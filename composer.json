@@ -1,0 +1,19 @@
+{
+	"name": "authwave/php-client",
+	"description": "PHP client library to implement Authwave in your application",
+
+	"require": {
+		"php": ">=7.4"
+	},
+
+	"autoload": {
+		"psr-4": {
+			"Authwave\\": "./src"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Authwave\\Test\\": "./test/phpunit"
+		}
+	}
+}
