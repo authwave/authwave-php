@@ -3,7 +3,8 @@
 	"description": "PHP client library to implement Authwave in your application",
 
 	"require": {
-		"php": ">=7.4"
+		"php": ">=7.4",
+		"phpgt/http": "1.*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "8.*"
