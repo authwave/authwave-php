@@ -6,31 +6,29 @@ use Psr\Http\Message\UriInterface;
 
 class Authenticator {
 	private Cipher $cipher;
-	private string $httpsScheme = "https";
-	private string $httpHost;
+	private UriInterface $baseUri;
 
-	public function __construct(Token $token, string $hostname) {
+	public function __construct(Token $token, string $baseUri) {
 		$this->cipher = $token->generateCipher();
-		$this->httpHost = $hostname;
-	}
-
-	public function useLocalhostHttps(bool $useHttps = true) {
-		if(!$useHttps) {
-			if($this->httpHost !== "localhost") {
-				throw new InsecureProtocolException();
-			}
-
-			$this->httpsScheme = "http";
-		}
+		$this->baseUri = $this->normaliseBaseUri($baseUri);
 	}
 
 	public function getAuthUri():UriInterface {
-		$uri = (new Uri())
-			->withScheme("https")
-			->withHost($this->httpHost);
+		return $this->baseUri;
+	}
 
-		if($this->httpHost === "localhost") {
-			$uri = $uri->withScheme($this->httpsScheme);
+	private function normaliseBaseUri(string $baseUri):Uri {
+		$scheme = parse_url($baseUri, PHP_URL_SCHEME) ?? "https";
+		$host = parse_url($baseUri, PHP_URL_HOST) ??
+			parse_url($baseUri, PHP_URL_PATH);
+
+		$uri = (new Uri())
+			->withScheme($scheme)
+			->withHost($host);
+
+		if($uri->getHost() !== "localhost"
+		&& $uri->getScheme() !== "https") {
+			throw new InsecureProtocolException($uri->getScheme());
 		}
 
 		return $uri;

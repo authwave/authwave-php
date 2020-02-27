@@ -46,8 +46,7 @@ class AuthenticatorTest extends TestCase {
 		$token->method("generateCipher")
 			->willReturn($cipher);
 
-		$sut = new Authenticator($token, "localhost");
-		$sut->useLocalhostHttps(false);
+		$sut = new Authenticator($token, "http://localhost");
 		$authUri = $sut->getAuthUri();
 		self::assertStringStartsWith(
 			"http://localhost",
@@ -62,8 +61,7 @@ class AuthenticatorTest extends TestCase {
 		$token->method("generateCipher")
 			->willReturn($cipher);
 
-		$sut = new Authenticator($token, "localhost.com");
 		self::expectException(InsecureProtocolException::class);
-		$sut->useLocalhostHttps(false);
+		new Authenticator($token, "http://localhost.com");
 	}
 }
