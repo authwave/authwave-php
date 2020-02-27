@@ -12,7 +12,7 @@ With the following PHP code below, you can display a log in button that, when cl
 
 ```php
 <?php
-use Authwave\Authenticator;
+use Authwave\Authenticator;use Gt\Session\SessionArrayWrapper;
 require __DIR__ . "/vendor/autoload.php";
 
 // These constants can be loaded from your application's configuration
@@ -25,8 +25,7 @@ define("CLIENT_SECRET", "aaaa-bbbb-cccc-dddd-eeee-ffff");
 $auth = new Authenticator(
         CLIENT_KEY, // See above
         CLIENT_SECRET, // See above
-        $_SERVER["REQUEST_URI"], // Redirect URI for after login completes
-        new SessionContainer($_SESSION) // Object-oriented session wrapper
+        $_SERVER["REQUEST_URI"] // Redirect URI for after login completes
 );
 
 // Handle authentication login/logout action via the querystring:

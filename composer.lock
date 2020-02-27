@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab5ab20325900711218b27a3cdcb7a44",
+    "content-hash": "45eac4d078f510731884c5ab78d27b98",
     "packages": [
         {
             "name": "phpgt/cookie",
@@ -114,6 +114,39 @@
             ],
             "description": "Encapsulated user input.",
             "time": "2019-11-29T11:22:35+00:00"
+        },
+        {
+            "name": "phpgt/session",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PhpGt/Session.git",
+                "reference": "97b793244a6cde7858f5bf07ecfad67ce4d6002b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PhpGt/Session/zipball/97b793244a6cde7858f5bf07ecfad67ce4d6002b",
+                "reference": "97b793244a6cde7858f5bf07ecfad67ce4d6002b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gt\\Session\\": "./src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Encapsulated user sessions.",
+            "time": "2020-02-27T16:06:07+00:00"
         },
         {
             "name": "psr/http-message",
@@ -1743,7 +1776,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "ext-openssl": "*"
     },
     "platform-dev": []
 }
