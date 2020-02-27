@@ -13,7 +13,6 @@ With the following PHP code below, you can display a log in button that, when cl
 ```php
 <?php
 use Authwave\Authenticator;
-use Authwave\Token;
 require __DIR__ . "/vendor/autoload.php";
 
 // These constants can be loaded from your application's configuration
@@ -21,38 +20,30 @@ require __DIR__ . "/vendor/autoload.php";
 define("CLIENT_KEY", "1234567890abcdef");
 define("CLIENT_SECRET", "aaaa-bbbb-cccc-dddd-eeee-ffff");
 
-// Persist a Token in the session to handle the remote authentication flow.
-$token = $_SESSION["authwave-token"] ?? new Token(CLIENT_KEY, CLIENT_SECRET);
-$_SESSION["authwave-token"] = $token;
-
 // Construct the Authenticator class as soon as possible, as this handles the
-// Authentication steps passed via the query string from Authwave.
+// Authentication steps passed bia the query string from the remote provider.
 $auth = new Authenticator(
-        $token,
-        "example.com",
-        $_SERVER["REQUEST_URI"]
+        CLIENT_KEY, // See above
+        CLIENT_SECRET, // See above
+        $_SERVER["REQUEST_URI"], // Redirect URI for after login completes
+        new SessionContainer($_SESSION) // Object-oriented session wrapper
 );
 
 // Handle authentication login/logout action via the querystring:
 if(isset($_GET["login"])) {
-// Redirect the user agent to the auth uri, which is a location on the remote
-// provider. The remote provider will in turn redirect the user agent back to
-// the return URI (set as 3rd parameter of Authenticator's constructor), at
-// which point the user will be considered authenticated.
-        header("Location: " . $auth->getAuthUri(), true, 303);
-        exit;
+// This will redirect the user agent to the auth uri, which is a location on the 
+// remote provider. The remote provider will in turn redirect the user agent
+// back to the return URI (set as 3rd parameter of Authenticator's constructor),
+// at which point the user will be considered authenticated.
+       $auth->login();
 }
 elseif(isset($_GET["logout"])) {
-// To log out, simply remove the Token from the session and reload the page.
-        unset($_SESSION["authwave-token"]);
-        header("Location: " . $_SERVER["REQUEST_URI"]);
-        exit;
+        $auth->logout();
 }
 
 // Authentication is handled by Authwave, so you can trust "isLoggedIn"
 // as a mechanism for protecting your sensitive information.
 if($auth->isLoggedIn()) {
-        $email = $auth->getEmail();
         echo <<<HTML
             <p>You are logged in as <strong>{$auth->getEmail()}</strong></p>
             <p><a href="?logout">Log out</a></p>
