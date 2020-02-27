@@ -1,6 +1,7 @@
 <?php
 namespace Authwave\Test;
 
+use Authwave\InitVector;
 use Authwave\Token;
 use PHPUnit\Framework\TestCase;
 
@@ -26,5 +27,11 @@ class TokenTest extends TestCase {
 		$cipher2 = $token2->generateCipher();
 
 		self::assertNotSame($cipher1, $cipher2);
+	}
+
+	public function testGetIv() {
+		$iv = self::createMock(InitVector::class);
+		$sut = new Token("", "", $iv);
+		self::assertSame($iv, $sut->getIv());
 	}
 }
