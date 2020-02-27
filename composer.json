@@ -4,6 +4,7 @@
 
 	"require": {
 		"php": ">=7.4",
+		"ext-openssl": "*",
 		"phpgt/http": "1.*"
 	},
 	"require-dev": {

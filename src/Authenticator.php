@@ -5,8 +5,9 @@ use Gt\Http\Uri;
 use Psr\Http\Message\UriInterface;
 
 class Authenticator {
-	private Cipher $cipher;
+	private Token $token;
 	private UriInterface $baseUri;
+	private string $returnPath;
 
 	/**
 	 * @param Token $token This must be the same instance of the Token when
@@ -15,9 +16,14 @@ class Authenticator {
 	 * @param string $baseUri The base URI of the application. This is the
 	 * URI authority with optional scheme, as localhost allows http://
 	 */
-	public function __construct(Token $token, string $baseUri) {
-		$this->cipher = $token->generateCipher();
+	public function __construct(
+		Token $token,
+		string $baseUri,
+		string $returnPath = "/"
+	) {
+		$this->token = $token;
 		$this->baseUri = $this->normaliseBaseUri($baseUri);
+		$this->returnPath = $returnPath;
 	}
 
 	/**
@@ -25,7 +31,11 @@ class Authenticator {
 	 * on the remote Authwave provider.
 	 */
 	public function getAuthUri():UriInterface {
-		return $this->baseUri;
+		return new AuthUri(
+			$this->baseUri,
+			$this->token,
+			$this->returnPath
+		);
 	}
 
 	private function normaliseBaseUri(string $baseUri):Uri {
