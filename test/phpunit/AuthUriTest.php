@@ -22,7 +22,7 @@ class AuthUriTest extends TestCase {
 		);
 	}
 
-	// All AuthUris MUST be served over HTTPS, with the one exception of localhost.
+// All AuthUris MUST be served over HTTPS, with the one exception of localhost.
 // But it should still default to HTTPS on localhost.
 	public function testGetAuthUriHostnameLocalhostHttpsByDefault() {
 		$token = self::createMock(Token::class);

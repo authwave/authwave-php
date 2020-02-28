@@ -2,7 +2,6 @@
 namespace Authwave;
 
 use Gt\Http\Uri;
-use Psr\Http\Message\UriInterface;
 
 class AuthUri extends Uri {
 	const DEFAULT_BASE_URI = "login.authwave.com";

@@ -3,11 +3,9 @@ namespace Authwave\Test;
 
 use Authwave\Authenticator;
 use Authwave\AuthUri;
-use Authwave\GlobalSessionContainer;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
-use Authwave\Test\Helper\TestRedirectHandler;
 use Authwave\UserData;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
