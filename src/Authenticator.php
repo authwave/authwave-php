@@ -16,5 +16,12 @@ class Authenticator {
 		if(is_null($session)) {
 			$session = new GlobalSessionContainer();
 		}
+
+		if(!$session->contains(GlobalSessionContainer::SESSION_KEY)) {
+			$session->set(
+				GlobalSessionContainer::SESSION_KEY,
+				new SessionData()
+			);
+		}
 	}
 }
