@@ -9,6 +9,7 @@ class Authenticator {
 	private string $clientKey;
 	private string $clientSecret;
 	private string $redirectPath;
+	private SessionContainer $session;
 	private SessionData $sessionData;
 
 	public function __construct(
@@ -28,6 +29,7 @@ class Authenticator {
 		$this->clientKey = $clientKey;
 		$this->clientSecret = $clientSecret;
 		$this->redirectPath = $redirectPath;
+		$this->session = $session;
 		$this->sessionData = $session->get(self::SESSION_KEY);
 
 		if($this->authInProgress()) {
@@ -46,6 +48,10 @@ class Authenticator {
 		}
 
 		return isset($userData);
+	}
+
+	public function logout():void {
+		$this->session->remove(self::SESSION_KEY);
 	}
 
 	private function authInProgress():bool {

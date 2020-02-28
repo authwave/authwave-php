@@ -59,4 +59,19 @@ class AuthenticatorTest extends TestCase {
 		);
 		self::assertTrue($sut->isLoggedIn());
 	}
+
+	public function testLogoutClearsSession() {
+		$sessionData = self::createMock(SessionData::class);
+		$_SESSION = [
+			Authenticator::SESSION_KEY => $sessionData
+		];
+
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/"
+		);
+		$sut->logout();
+		self::assertEmpty($_SESSION);
+	}
 }
