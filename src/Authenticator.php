@@ -9,6 +9,7 @@ class Authenticator {
 	private string $clientKey;
 	private string $clientSecret;
 	private string $redirectPath;
+	private string $authwaveHost;
 	private SessionContainer $session;
 	private SessionData $sessionData;
 	private RedirectHandler $redirectHandler;
@@ -17,6 +18,7 @@ class Authenticator {
 		string $clientKey,
 		string $clientSecret,
 		string $redirectPath,
+		string $authwaveHost = "login.authwave.com",
 		SessionContainer $session = null,
 		RedirectHandler $redirectHandler = null
 	) {
@@ -31,6 +33,7 @@ class Authenticator {
 		$this->clientKey = $clientKey;
 		$this->clientSecret = $clientSecret;
 		$this->redirectPath = $redirectPath;
+		$this->authwaveHost = $authwaveHost;
 		$this->session = $session;
 		$this->sessionData = $session->get(self::SESSION_KEY);
 		$this->redirectHandler = $redirectHandler ?? new RedirectHandler();
@@ -58,7 +61,9 @@ class Authenticator {
 			return;
 		}
 
-
+		$token = new Token($this->clientKey, $this->clientSecret);
+		$loginUri = new AuthUri($token, $this->authwaveHost);
+		$this->redirectHandler->redirect($loginUri);
 	}
 
 	public function logout():void {

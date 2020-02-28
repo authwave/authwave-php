@@ -15,7 +15,7 @@ class AuthUriTest extends TestCase {
 			->willReturn("https://example.com");
 		$token = self::createMock(Token::class);
 
-		$sut = new AuthUri($token, $baseUri, "");
+		$sut = new AuthUri($token, "", $baseUri);
 		self::assertEquals(
 			"https",
 			$sut->getScheme()
@@ -26,7 +26,7 @@ class AuthUriTest extends TestCase {
 // But it should still default to HTTPS on localhost.
 	public function testGetAuthUriHostnameLocalhostHttpsByDefault() {
 		$token = self::createMock(Token::class);
-		$sut = new AuthUri($token, "localhost");
+		$sut = new AuthUri($token, "/", "localhost");
 		self::assertStringStartsWith(
 			"https://localhost",
 			$sut
@@ -36,7 +36,7 @@ class AuthUriTest extends TestCase {
 // We should be able to set the scheme to HTTP for localhost hostname only.
 	public function testGetAuthUriHostnameLocalhostHttpAllowed() {
 		$token = self::createMock(Token::class);
-		$sut = new AuthUri($token, "http://localhost");
+		$sut = new AuthUri($token, "/", "http://localhost");
 		self::assertStringStartsWith(
 			"http://localhost",
 			$sut
@@ -47,7 +47,7 @@ class AuthUriTest extends TestCase {
 	public function testGetAuthUriHostnameNotLocalhostHttpNotAllowed() {
 		$token = self::createMock(Token::class);
 		self::expectException(InsecureProtocolException::class);
-		new AuthUri($token, "http://localhost.com");
+		new AuthUri($token, "/", "http://localhost.com");
 	}
 
 	public function testAuthUriHttpsInferred() {
@@ -57,7 +57,7 @@ class AuthUriTest extends TestCase {
 // Note on the line above, no scheme is passed in - we must assume https.
 		$token = self::createMock(Token::class);
 
-		$sut = new AuthUri($token, $baseUri, "");
+		$sut = new AuthUri($token, "/", $baseUri);
 		self::assertEquals(
 			"https",
 			$sut->getScheme()
@@ -79,7 +79,7 @@ class AuthUriTest extends TestCase {
 			->willReturn($iv);
 
 		$returnPath = "/examplePage";
-		$sut = new AuthUri($token, $baseUri, $returnPath);
+		$sut = new AuthUri($token, $returnPath, $baseUri);
 		parse_str($sut->getQuery(), $queryParts);
 
 		self::assertEquals(

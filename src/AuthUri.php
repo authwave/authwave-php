@@ -5,6 +5,8 @@ use Gt\Http\Uri;
 use Psr\Http\Message\UriInterface;
 
 class AuthUri extends Uri {
+	const DEFAULT_BASE_URI = "login.authwave.com";
+
 	const QUERY_STRING_CIPHER = "cipher";
 	const QUERY_STRING_INIT_VECTOR = "iv";
 	const QUERY_STRING_RETURN_PATH = "return";
@@ -13,13 +15,14 @@ class AuthUri extends Uri {
 	 * @param Token $token This must be the same instance of the Token when
 	 * creating Authenticator for the first time as it is when checking the
 	 * response from the Authwave provider (store in a session).
+	 * @param string $returnPath
 	 * @param string $baseUri The base URI of the application. This is the
 	 * URI authority with optional scheme, as localhost allows http://
 	 */
 	public function __construct(
 		Token $token,
-		string $baseUri,
-		string $returnPath = "/"
+		string $returnPath = "/",
+		string $baseUri = self::DEFAULT_BASE_URI
 	) {
 		$baseUri = $this->normaliseBaseUri($baseUri);
 

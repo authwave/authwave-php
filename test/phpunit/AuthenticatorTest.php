@@ -2,6 +2,7 @@
 namespace Authwave\Test;
 
 use Authwave\Authenticator;
+use Authwave\AuthUri;
 use Authwave\GlobalSessionContainer;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
@@ -9,23 +10,20 @@ use Authwave\SessionNotStartedException;
 use Authwave\Test\Helper\TestRedirectHandler;
 use Authwave\UserData;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UriInterface;
 
 class AuthenticatorTest extends TestCase {
 	public function testConstructWithDefaultSessionNotStarted() {
 		self::expectException(SessionNotStartedException::class);
 		new Authenticator(
-			"test-key",
-			"test-secret",
-			"/"
+			"test-key", "test-secret", "/",
 		);
 	}
 
 	public function testConstructWithDefaultSession() {
 		$_SESSION = [];
 		new Authenticator(
-			"test-key",
-			"test-secret",
-			"/"
+			"test-key", "test-secret", "/",
 		);
 		self::assertArrayHasKey(
 			Authenticator::SESSION_KEY,
@@ -36,9 +34,7 @@ class AuthenticatorTest extends TestCase {
 	public function testIsLoggedInFalseByDefault() {
 		$_SESSION = [];
 		$sut = new Authenticator(
-			"test-key",
-			"test-secret",
-			"/"
+			"test-key", "test-secret", "/",
 		);
 		self::assertFalse($sut->isLoggedIn());
 	}
@@ -55,9 +51,7 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$sut = new Authenticator(
-			"test-key",
-			"test-secret",
-			"/"
+			"test-key", "test-secret", "/",
 		);
 		self::assertTrue($sut->isLoggedIn());
 	}
@@ -69,28 +63,27 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$sut = new Authenticator(
-			"test-key",
-			"test-secret",
-			"/"
+			"test-key", "test-secret", "/",
 		);
 		$sut->logout();
 		self::assertEmpty($_SESSION);
 	}
 
 	public function testLoginRedirects() {
+		$_SESSION = [];
+
 		$redirectHandler = self::createMock(RedirectHandler::class);
 		$redirectHandler->expects(self::once())
 			->method("redirect")
-			->with(
-				self::callback(function($uri) {
-					echo $uri;
-				})
-			);
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getHost() === AuthUri::DEFAULT_BASE_URI
+			));
 
 		$sut = new Authenticator(
 			"test-key",
 			"test-secret",
 			"/",
+			AuthUri::DEFAULT_BASE_URI,
 			null,
 			$redirectHandler
 		);
