@@ -40,10 +40,13 @@ class AuthUri extends Uri {
 			?? "https";
 		$host = parse_url($baseUri, PHP_URL_HOST)
 			?? parse_url($baseUri, PHP_URL_PATH);
+		$port = parse_url($baseUri, PHP_URL_PORT)
+			?? 80;
 
 		$uri = (new Uri())
 			->withScheme($scheme)
-			->withHost($host);
+			->withHost($host)
+			->withPort($port);
 
 		if($uri->getHost() !== "localhost"
 		&& $uri->getScheme() !== "https") {

@@ -89,4 +89,27 @@ class AuthenticatorTest extends TestCase {
 		);
 		$sut->login();
 	}
+
+	public function testLoginRedirectsLocalhost() {
+		$_SESSION = [];
+
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getScheme() === "http"
+				&& $uri->getHost() === "localhost"
+				&& $uri->getPort() === 8081
+			));
+
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/",
+			"http://localhost:8081",
+			null,
+			$redirectHandler
+		);
+		$sut->login();
+	}
 }

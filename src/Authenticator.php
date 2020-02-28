@@ -62,7 +62,11 @@ class Authenticator {
 		}
 
 		$token = new Token($this->clientKey, $this->clientSecret);
-		$loginUri = new AuthUri($token, $this->authwaveHost);
+		$loginUri = new AuthUri(
+			$token,
+			$this->redirectPath,
+			$this->authwaveHost
+		);
 		$this->redirectHandler->redirect($loginUri);
 	}
 
