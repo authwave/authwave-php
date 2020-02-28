@@ -11,12 +11,14 @@ class Authenticator {
 	private string $redirectPath;
 	private SessionContainer $session;
 	private SessionData $sessionData;
+	private RedirectHandler $redirectHandler;
 
 	public function __construct(
 		string $clientKey,
 		string $clientSecret,
 		string $redirectPath,
-		SessionContainer $session = null
+		SessionContainer $session = null,
+		RedirectHandler $redirectHandler = null
 	) {
 		if(is_null($session)) {
 			$session = new GlobalSessionContainer();
@@ -31,6 +33,7 @@ class Authenticator {
 		$this->redirectPath = $redirectPath;
 		$this->session = $session;
 		$this->sessionData = $session->get(self::SESSION_KEY);
+		$this->redirectHandler = $redirectHandler ?? new RedirectHandler();
 
 		if($this->authInProgress()) {
 			$this->completeAuth();
@@ -50,16 +53,21 @@ class Authenticator {
 		return isset($userData);
 	}
 
+	public function login():void {
+		if($this->isLoggedIn()) {
+			return;
+		}
+
+
+	}
+
 	public function logout():void {
+// TODO: Should the logout redirect the user agent to the redirectPath?
 		$this->session->remove(self::SESSION_KEY);
 	}
 
 	private function authInProgress():bool {
 		return false;
-	}
-
-	private function beginAuth():void {
-
 	}
 
 	private function completeAuth():void {

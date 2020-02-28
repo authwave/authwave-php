@@ -3,8 +3,10 @@ namespace Authwave\Test;
 
 use Authwave\Authenticator;
 use Authwave\GlobalSessionContainer;
+use Authwave\RedirectHandler;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
+use Authwave\Test\Helper\TestRedirectHandler;
 use Authwave\UserData;
 use PHPUnit\Framework\TestCase;
 
@@ -73,5 +75,25 @@ class AuthenticatorTest extends TestCase {
 		);
 		$sut->logout();
 		self::assertEmpty($_SESSION);
+	}
+
+	public function testLoginRedirects() {
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(
+				self::callback(function($uri) {
+					echo $uri;
+				})
+			);
+
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/",
+			null,
+			$redirectHandler
+		);
+		$sut->login();
 	}
 }
