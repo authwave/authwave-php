@@ -4,8 +4,12 @@ namespace Authwave;
 use Gt\Session\SessionContainer;
 
 class Authenticator {
-	const SESSION_KEY_AUTH_FLOW = "authwave-authflow";
-	const SESSION_KEY_USER_DATA = "authwave-userdata";
+	const SESSION_KEY = "AUTHWAVE_SESSION";
+
+	private string $clientKey;
+	private string $clientSecret;
+	private string $redirectPath;
+	private SessionData $sessionData;
 
 	public function __construct(
 		string $clientKey,
@@ -17,11 +21,42 @@ class Authenticator {
 			$session = new GlobalSessionContainer();
 		}
 
-		if(!$session->contains(GlobalSessionContainer::SESSION_KEY)) {
-			$session->set(
-				GlobalSessionContainer::SESSION_KEY,
-				new SessionData()
-			);
+		if(!$session->contains(self::SESSION_KEY)) {
+			$session->set(self::SESSION_KEY, new SessionData());
 		}
+
+		$this->clientKey = $clientKey;
+		$this->clientSecret = $clientSecret;
+		$this->redirectPath = $redirectPath;
+		$this->sessionData = $session->get(self::SESSION_KEY);
+
+		if($this->authInProgress()) {
+			$this->completeAuth();
+		}
+	}
+
+	public function isLoggedIn():bool {
+		$userData = null;
+
+		try {
+			$userData = $this->sessionData->getUserData();
+		}
+		catch(UserDataNotSetException $exception) {
+			return false;
+		}
+
+		return isset($userData);
+	}
+
+	private function authInProgress():bool {
+		return false;
+	}
+
+	private function beginAuth():void {
+
+	}
+
+	private function completeAuth():void {
+
 	}
 }

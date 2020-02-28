@@ -4,8 +4,6 @@ namespace Authwave;
 class SessionData {
 	private InitVector $iv;
 
-	// TODO: Store User data here too.
-
 	public function getIv():InitVector {
 		if(!isset($this->iv)) {
 			throw new InitVectorNotSetException();
@@ -20,5 +18,11 @@ class SessionData {
 
 	public function removeIv():void {
 		unset($this->iv);
+	}
+
+	public function getUserData():UserData {
+		if(!isset($this->userData)) {
+			throw new UserDataNotSetException();
+		}
 	}
 }
