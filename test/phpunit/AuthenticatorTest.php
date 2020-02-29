@@ -156,6 +156,27 @@ class AuthenticatorTest extends TestCase {
 		$sut->login($token);
 	}
 
+	public function testLoginDoesNothingWhenAlreadyLoggedIn() {
+		$sessionData = self::createMock(SessionData::class);
+		$_SESSION = [
+			Authenticator::SESSION_KEY => $sessionData,
+		];
+
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::never())
+			->method("redirect");
+
+		$sut = new Authenticator(
+			"test-key",
+			"/",
+			AuthUri::DEFAULT_BASE_URI,
+			null,
+			$redirectHandler
+		);
+
+		$sut->login();
+	}
+
 	public function testGetUuidThrowsExceptionWhenNotLoggedIn() {
 		$_SESSION = [];
 		$sut = new Authenticator(
