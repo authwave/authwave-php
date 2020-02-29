@@ -1,13 +1,14 @@
 <?php
 namespace Authwave;
 
+use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
 
 class Authenticator {
 	const SESSION_KEY = "AUTHWAVE_SESSION";
+	const RESPONSE_QUERY_PARAMETER = "AUTHWAVE_RESPONSE_DATA";
 
 	private string $clientKey;
-	private string $clientSecret;
 	private string $currentUriPath;
 	private string $authwaveHost;
 	private SessionContainer $session;
@@ -16,7 +17,6 @@ class Authenticator {
 
 	public function __construct(
 		string $clientKey,
-		string $clientSecret,
 		string $currentUriPath,
 		string $authwaveHost = "login.authwave.com",
 		SessionContainer $session = null,
@@ -27,20 +27,19 @@ class Authenticator {
 		}
 
 		if(!$session->contains(self::SESSION_KEY)) {
+// TODO: If there is no Token or UserData in the SessionData, do we even
+// need to store it to the current session at all?
 			$session->set(self::SESSION_KEY, new SessionData());
 		}
 
 		$this->clientKey = $clientKey;
-		$this->clientSecret = $clientSecret;
 		$this->currentUriPath = $currentUriPath;
 		$this->authwaveHost = $authwaveHost;
 		$this->session = $session;
 		$this->sessionData = $session->get(self::SESSION_KEY);
 		$this->redirectHandler = $redirectHandler ?? new RedirectHandler();
 
-		if($this->authInProgress()) {
-			$this->completeAuth();
-		}
+		$this->completeAuth();
 	}
 
 	public function isLoggedIn():bool {
@@ -62,8 +61,11 @@ class Authenticator {
 		}
 
 		if(is_null($token)) {
-			$token = new Token($this->clientKey, $this->clientSecret);
+			$token = new Token($this->clientKey);
 		}
+
+		$this->sessionData = new SessionData($token);
+		$this->session->set(self::SESSION_KEY, $this->sessionData);
 
 		$loginUri = new AuthUri(
 			$token,
@@ -88,11 +90,41 @@ class Authenticator {
 		return $userData->getEmail();
 	}
 
-	private function authInProgress():bool {
-		return false;
+	private function completeAuth():void {
+		$responseCipher = $this->getResponseCipher();
+
+		if(!$responseCipher) {
+			return;
+		}
+
+		$token = $this->sessionData->getToken();
+		$userData = $token->decryptResponseCipher($responseCipher);
+		$this->session->set(
+			self::SESSION_KEY,
+			new SessionData($token, $userData)
+		);
+
+		$this->redirectHandler->redirect(
+			(new Uri($this->currentUriPath))
+			->withoutQueryValue(self::RESPONSE_QUERY_PARAMETER)
+		);
 	}
 
-	private function completeAuth():void {
+	private function getResponseCipher():?string {
+		$queryString = parse_url(
+			$this->currentUriPath,
+			PHP_URL_QUERY
+		);
+		if(!$queryString) {
+			return null;
+		}
 
+		$queryParts = [];
+		parse_str($queryString, $queryParts);
+		if(empty($queryParts[self::RESPONSE_QUERY_PARAMETER])) {
+			return null;
+		}
+
+		return $queryParts[self::RESPONSE_QUERY_PARAMETER];
 	}
 }

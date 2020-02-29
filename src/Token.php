@@ -1,33 +1,72 @@
 <?php
 namespace Authwave;
 
+use Authwave\Test\MalformedReponseDataException;
+use JsonException;
+
 class Token {
 	const ENCRYPTION_METHOD = "aes128";
 
 	private string $key;
-	private string $secret;
+	private string $secretIv;
 	private InitVector $iv;
 
 	public function __construct(
 		string $key,
-		string $secret,
+		InitVector $secretIv = null,
 		InitVector $iv = null
 	) {
 		$this->key = $key;
-		$this->secret = $secret;
+		$this->secretIv = $secretIv ?? new InitVector();
 		$this->iv = $iv ?? new InitVector();
 	}
 
-	public function generateCipher():string {
+// The request cipher is sent to the remote provider in the querystring. It
+// consists of the secret IV, encrypted with the client key. The remote provider
+// will decrypt the secret and use it as the key when encrypting the response
+// cipher, which will be sent back to the client application in the querystring.
+	public function generateRequestCipher():string {
 		$rawCipher = openssl_encrypt(
-			$this->secret,
+			$this->secretIv,
 			self::ENCRYPTION_METHOD,
 			$this->key,
 			0,
-			$this->iv
+			$this->iv->getBytes()
 		);
 
 		return base64_encode($rawCipher);
+	}
+
+// The response cipher is send from the remote provider back to the client
+// application after a successful authentication and includes a serialised
+// UserData object, encrypted using the secret IV, which was created when
+// encrypting the original request cipher.
+	public function decryptResponseCipher(string $cipher):UserData {
+		$decrypted = openssl_decrypt(
+			base64_decode($cipher),
+			self::ENCRYPTION_METHOD,
+			$this->secretIv->getBytes(),
+			0,
+			$this->iv->getBytes()
+		);
+
+		if(!$decrypted) {
+			throw new ResponseCipherDecryptionException();
+		}
+
+		try {
+			$obj = json_decode(
+				$decrypted,
+				false,
+				2,
+				JSON_THROW_ON_ERROR
+			);
+		}
+		catch(JsonException $exception) {
+			throw new InvalidUserDataSerializationException();
+		}
+
+		return new UserData($obj->uuid, $obj->email);
 	}
 
 	public function getIv():InitVector {

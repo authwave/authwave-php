@@ -2,22 +2,23 @@
 namespace Authwave;
 
 class SessionData {
-	private InitVector $iv;
+	private ?Token $token;
+	private ?UserData $userData;
 
-	public function getIv():InitVector {
-		if(!isset($this->iv)) {
-			throw new InitVectorNotSetException();
+	public function __construct(
+		Token $token = null,
+		UserData $userData = null
+	) {
+		$this->token = $token;
+		$this->userData = $userData;
+	}
+
+	public function getToken():Token {
+		if(!isset($this->token)) {
+			throw new NotLoggedInException();
 		}
 
-		return $this->iv;
-	}
-
-	public function setIv(InitVector $iv):void {
-		$this->iv = $iv;
-	}
-
-	public function removeIv():void {
-		unset($this->iv);
+		return $this->token;
 	}
 
 	public function getUserData():UserData {
@@ -25,6 +26,6 @@ class SessionData {
 			throw new NotLoggedInException();
 		}
 
-		return $this->getUserData();
+		return $this->userData;
 	}
 }

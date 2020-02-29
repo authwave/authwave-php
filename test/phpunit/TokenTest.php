@@ -6,32 +6,30 @@ use Authwave\Token;
 use PHPUnit\Framework\TestCase;
 
 class TokenTest extends TestCase {
-	public function testGenerateCipherSameForSameToken() {
+	public function testGenerateRequestCipherSameForSameToken() {
 		$token = new Token(
 			"test-key",
-			"test-secret"
 		);
 
-		$cipher1 = $token->generateCipher();
-		$cipher2 = $token->generateCipher();
+		$cipher1 = $token->generateRequestCipher();
+		$cipher2 = $token->generateRequestCipher();
 
 		self::assertSame($cipher1, $cipher2);
 	}
 
-	public function testGenerateCipherDifferentForDifferentTokenSameDetails() {
+	public function testGenerateRequestCipherDifferentForDifferentTokenSameDetails() {
 		$key = "test-key";
-		$secret = "test-secret";
-		$token1 = new Token($key, $secret);
-		$token2 = new Token($key, $secret);
-		$cipher1 = $token1->generateCipher();
-		$cipher2 = $token2->generateCipher();
+		$token1 = new Token($key);
+		$token2 = new Token($key);
+		$cipher1 = $token1->generateRequestCipher();
+		$cipher2 = $token2->generateRequestCipher();
 
 		self::assertNotSame($cipher1, $cipher2);
 	}
 
 	public function testGetIv() {
 		$iv = self::createMock(InitVector::class);
-		$sut = new Token("", "", $iv);
+		$sut = new Token("", null, $iv);
 		self::assertSame($iv, $sut->getIv());
 	}
 }

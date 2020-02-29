@@ -73,7 +73,7 @@ class AuthUriTest extends TestCase {
 
 		$baseUri = self::createMock(UriInterface::class);
 		$token = self::createMock(Token::class);
-		$token->method("generateCipher")
+		$token->method("generateRequestCipher")
 			->willReturn($mockCipherValue);
 		$token->method("getIv")
 			->willReturn($iv);

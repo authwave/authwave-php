@@ -28,7 +28,7 @@ class AuthUri extends Uri {
 		parent::__construct($baseUri);
 
 		$this->query = http_build_query([
-			self::QUERY_STRING_CIPHER => (string)$token->generateCipher(),
+			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher(),
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
 			self::QUERY_STRING_CURRENT_PATH => $currentPath,
 		]);

@@ -11,26 +11,19 @@ use Authwave\SessionNotStartedException;
 use Authwave\Token;
 use Authwave\UserData;
 use Gt\Session\Session;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 
 class AuthenticatorTest extends TestCase {
 	public function testConstructWithDefaultSessionNotStarted() {
 		self::expectException(SessionNotStartedException::class);
-		new Authenticator(
-			"test-key",
-			"test-secret",
-			"/",
-		);
+		new Authenticator("test-key","/");
 	}
 
 	public function testConstructWithDefaultSession() {
 		$_SESSION = [];
-		new Authenticator(
-			"test-key",
-			"test-secret",
-			"/",
-		);
+		new Authenticator("test-key", "/");
 		self::assertArrayHasKey(
 			Authenticator::SESSION_KEY,
 			$_SESSION
@@ -41,8 +34,7 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
-			"/",
+			"/"
 		);
 		self::assertFalse($sut->isLoggedIn());
 	}
@@ -60,7 +52,6 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/",
 		);
 		self::assertTrue($sut->isLoggedIn());
@@ -74,7 +65,6 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/",
 		);
 		$sut->logout();
@@ -93,7 +83,6 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/",
 			AuthUri::DEFAULT_BASE_URI,
 			null,
@@ -116,7 +105,6 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/",
 			"http://localhost:8081",
 			null,
@@ -129,7 +117,6 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 
 		$key = uniqid("key-");
-		$secret = uniqid("secret-");
 		$currentPath = uniqid("/path/");
 
 		$cipher = "example-cipher";
@@ -140,7 +127,7 @@ class AuthenticatorTest extends TestCase {
 			->willReturn($ivString);
 
 		$token = self::createMock(Token::class);
-		$token->method("generateCipher")
+		$token->method("generateRequestCipher")
 			->willReturn($cipher);
 		$token->method("getIv")
 			->willReturn($iv);
@@ -161,7 +148,6 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			$key,
-			$secret,
 			$currentPath,
 			AuthUri::DEFAULT_BASE_URI,
 			null,
@@ -174,7 +160,6 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/"
 		);
 		self::expectException(NotLoggedInException::class);
@@ -196,7 +181,6 @@ class AuthenticatorTest extends TestCase {
 		];
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/"
 		);
 		self::assertEquals($expectedUuid, $sut->getUuid());
@@ -206,7 +190,6 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/"
 		);
 		self::expectException(NotLoggedInException::class);
@@ -228,36 +211,68 @@ class AuthenticatorTest extends TestCase {
 		];
 		$sut = new Authenticator(
 			"test-key",
-			"test-secret",
 			"/"
 		);
 		self::assertEquals($expectedEmail, $sut->getEmail());
 	}
 
+	public function testCompleteAuthNotLoggedIn() {
+		$currentUri = "/?"
+			. Authenticator::RESPONSE_QUERY_PARAMETER
+			. "=0123456789abcdef";
+
+		$_SESSION = [];
+		self::expectException(NotLoggedInException::class);
+		new Authenticator(
+			"test-key",
+			$currentUri
+		);
+	}
+
 // When the remote provider redirects back to the client application, a query
-// string parameter "authwave" is provided, with encrypted user and config data.
+// string parameter is provided containing encrypted user and config data.
 // In this example, we make our own query string parameter, which will NOT
 // decrypt properly, and should throw an exception to prevent unauthorised
 // access.
-	public function testAuthInProgressMalformedUri() {
-		$currentUri = "/?authwave=0123456789abcdef";
-		$expectedRedirectUri = "http://localhost:8080/my-configured-redirect-uri";
+	public function testCompleteAuth() {
+		$currentUri = "/my-page?filter=example&"
+			. Authenticator::RESPONSE_QUERY_PARAMETER
+			. "=0123456789abcdef";
 
 		$redirectHandler = self::createMock(RedirectHandler::class);
 		$redirectHandler->expects(self::once())
 			->method("redirect")
 			->with(self::callback(fn(UriInterface $uri) =>
-				(string)$uri === $expectedRedirectUri
+				$uri->getQuery() === "filter=example"
+				&& $uri->getPath() === "/my-page"
 			));
+		$token = self::createMock(Token::class);
 
-		self::expectException(MalformedReponseDataException::class);
+		$sessionData = self::createMock(SessionData::class);
+		$sessionData->method("getToken")
+			->willReturn($token);
+
+		$_SESSION = [
+			Authenticator::SESSION_KEY => $sessionData,
+		];
 		new Authenticator(
 			"test-key",
-			"test-secret",
 			$currentUri,
 			AuthUri::DEFAULT_BASE_URI,
 			null,
 			$redirectHandler
+		);
+
+		/** @var SessionData $newSessionData */
+		$newSessionData = $_SESSION[Authenticator::SESSION_KEY];
+		self::assertNotSame($sessionData, $newSessionData);
+		self::assertInstanceOf(
+			SessionData::class,
+			$newSessionData
+		);
+		self::assertInstanceOf(
+			UserData::class,
+			$newSessionData->getUserData()
 		);
 	}
 }

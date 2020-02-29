@@ -5,6 +5,7 @@
 	"require": {
 		"php": ">=7.4",
 		"ext-openssl": "*",
+		"ext-json": "*",
 		"phpgt/http": "1.*",
 		"phpgt/session": ">=1.1"
 	},
