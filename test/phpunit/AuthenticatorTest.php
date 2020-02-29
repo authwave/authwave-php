@@ -233,4 +233,31 @@ class AuthenticatorTest extends TestCase {
 		);
 		self::assertEquals($expectedEmail, $sut->getEmail());
 	}
+
+// When the remote provider redirects back to the client application, a query
+// string parameter "authwave" is provided, with encrypted user and config data.
+// In this example, we make our own query string parameter, which will NOT
+// decrypt properly, and should throw an exception to prevent unauthorised
+// access.
+	public function testAuthInProgressMalformedUri() {
+		$currentUri = "/?authwave=0123456789abcdef";
+		$expectedRedirectUri = "http://localhost:8080/my-configured-redirect-uri";
+
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				(string)$uri === $expectedRedirectUri
+			));
+
+		self::expectException(MalformedReponseDataException::class);
+		new Authenticator(
+			"test-key",
+			"test-secret",
+			$currentUri,
+			AuthUri::DEFAULT_BASE_URI,
+			null,
+			$redirectHandler
+		);
+	}
 }
