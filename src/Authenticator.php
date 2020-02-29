@@ -83,6 +83,11 @@ class Authenticator {
 		return $userData->getUuid();
 	}
 
+	public function getEmail():string {
+		$userData = $this->sessionData->getUserData();
+		return $userData->getEmail();
+	}
+
 	private function authInProgress():bool {
 		return false;
 	}

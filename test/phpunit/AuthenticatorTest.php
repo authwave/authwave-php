@@ -201,4 +201,36 @@ class AuthenticatorTest extends TestCase {
 		);
 		self::assertEquals($expectedUuid, $sut->getUuid());
 	}
+
+	public function testGetEmailThrowsExceptionWhenNotLoggedIn() {
+		$_SESSION = [];
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/"
+		);
+		self::expectException(NotLoggedInException::class);
+		$sut->getEmail();
+	}
+
+	public function testGetEmail() {
+		$expectedEmail = "example@example.com";
+
+		$userData = self::createMock(UserData::class);
+		$userData->method("getEmail")
+			->willReturn($expectedEmail);
+		$sessionData = self::createMock(SessionData::class);
+		$sessionData->method("getUserData")
+			->willReturn($userData);
+
+		$_SESSION = [
+			Authenticator::SESSION_KEY => $sessionData,
+		];
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/"
+		);
+		self::assertEquals($expectedEmail, $sut->getEmail());
+	}
 }
