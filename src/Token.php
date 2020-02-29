@@ -8,7 +8,7 @@ class Token {
 	const ENCRYPTION_METHOD = "aes128";
 
 	private string $key;
-	private string $secretIv;
+	private InitVector $secretIv;
 	private InitVector $iv;
 
 	public function __construct(
@@ -19,6 +19,10 @@ class Token {
 		$this->key = $key;
 		$this->secretIv = $secretIv ?? new InitVector();
 		$this->iv = $iv ?? new InitVector();
+	}
+
+	public function getIv():InitVector {
+		return $this->iv;
 	}
 
 // The request cipher is sent to the remote provider in the querystring. It
@@ -45,7 +49,10 @@ class Token {
 		$decrypted = openssl_decrypt(
 			base64_decode($cipher),
 			self::ENCRYPTION_METHOD,
-			$this->secretIv->getBytes(),
+			implode("|", [
+				$this->key,
+				$this->secretIv->getBytes(),
+			]),
 			0,
 			$this->iv->getBytes()
 		);
@@ -67,9 +74,5 @@ class Token {
 		}
 
 		return new UserData($obj->uuid, $obj->email);
-	}
-
-	public function getIv():InitVector {
-		return $this->iv;
 	}
 }
