@@ -296,4 +296,19 @@ class AuthenticatorTest extends TestCase {
 			$newSessionData->getUserData()
 		);
 	}
+
+	public function testCompleteAuthNotAffectedByQueryString() {
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::never())
+			->method("redirect");
+		$_SESSION = [];
+
+		new Authenticator(
+			"test-key",
+			"/example-path?filter=something",
+			AuthUri::DEFAULT_BASE_URI,
+			null,
+			$redirectHandler
+		);
+	}
 }
