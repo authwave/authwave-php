@@ -4,11 +4,13 @@ namespace Authwave\Test;
 use Authwave\Authenticator;
 use Authwave\AuthUri;
 use Authwave\InitVector;
+use Authwave\NotLoggedInException;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
 use Authwave\Token;
 use Authwave\UserData;
+use Gt\Session\Session;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 
@@ -16,14 +18,18 @@ class AuthenticatorTest extends TestCase {
 	public function testConstructWithDefaultSessionNotStarted() {
 		self::expectException(SessionNotStartedException::class);
 		new Authenticator(
-			"test-key", "test-secret", "/",
+			"test-key",
+			"test-secret",
+			"/",
 		);
 	}
 
 	public function testConstructWithDefaultSession() {
 		$_SESSION = [];
 		new Authenticator(
-			"test-key", "test-secret", "/",
+			"test-key",
+			"test-secret",
+			"/",
 		);
 		self::assertArrayHasKey(
 			Authenticator::SESSION_KEY,
@@ -34,7 +40,9 @@ class AuthenticatorTest extends TestCase {
 	public function testIsLoggedInFalseByDefault() {
 		$_SESSION = [];
 		$sut = new Authenticator(
-			"test-key", "test-secret", "/",
+			"test-key",
+			"test-secret",
+			"/",
 		);
 		self::assertFalse($sut->isLoggedIn());
 	}
@@ -51,7 +59,9 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$sut = new Authenticator(
-			"test-key", "test-secret", "/",
+			"test-key",
+			"test-secret",
+			"/",
 		);
 		self::assertTrue($sut->isLoggedIn());
 	}
@@ -63,7 +73,9 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$sut = new Authenticator(
-			"test-key", "test-secret", "/",
+			"test-key",
+			"test-secret",
+			"/",
 		);
 		$sut->logout();
 		self::assertEmpty($_SESSION);
@@ -156,5 +168,37 @@ class AuthenticatorTest extends TestCase {
 			$redirectHandler
 		);
 		$sut->login($token);
+	}
+
+	public function testGetUuidThrowsExceptionWhenNotLoggedIn() {
+		$_SESSION = [];
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/"
+		);
+		self::expectException(NotLoggedInException::class);
+		$sut->getUuid();
+	}
+
+	public function testGetUuid() {
+		$expectedUuid = uniqid("example-uuid-");
+
+		$userData = self::createMock(UserData::class);
+		$userData->method("getUuid")
+			->willReturn($expectedUuid);
+		$sessionData = self::createMock(SessionData::class);
+		$sessionData->method("getUserData")
+			->willReturn($userData);
+
+		$_SESSION = [
+			Authenticator::SESSION_KEY => $sessionData,
+		];
+		$sut = new Authenticator(
+			"test-key",
+			"test-secret",
+			"/"
+		);
+		self::assertEquals($expectedUuid, $sut->getUuid());
 	}
 }

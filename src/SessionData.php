@@ -22,7 +22,9 @@ class SessionData {
 
 	public function getUserData():UserData {
 		if(!isset($this->userData)) {
-			throw new UserDataNotSetException();
+			throw new NotLoggedInException();
 		}
+
+		return $this->getUserData();
 	}
 }

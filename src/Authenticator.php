@@ -49,7 +49,7 @@ class Authenticator {
 		try {
 			$userData = $this->sessionData->getUserData();
 		}
-		catch(UserDataNotSetException $exception) {
+		catch(NotLoggedInException $exception) {
 			return false;
 		}
 
@@ -76,6 +76,11 @@ class Authenticator {
 	public function logout():void {
 // TODO: Should the logout redirect the user agent to the redirectPath?
 		$this->session->remove(self::SESSION_KEY);
+	}
+
+	public function getUuid():string {
+		$userData = $this->sessionData->getUserData();
+		return $userData->getUuid();
 	}
 
 	private function authInProgress():bool {
