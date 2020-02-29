@@ -93,8 +93,8 @@ class AuthUriTest extends TestCase {
 		);
 
 		self::assertEquals(
-			base64_encode($returnPath),
-			$queryParts[AuthUri::QUERY_STRING_RETURN_PATH]
+			$returnPath,
+			$queryParts[AuthUri::QUERY_STRING_CURRENT_PATH]
 		);
 	}
 }

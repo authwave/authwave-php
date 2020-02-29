@@ -8,19 +8,19 @@ class AuthUri extends Uri {
 
 	const QUERY_STRING_CIPHER = "cipher";
 	const QUERY_STRING_INIT_VECTOR = "iv";
-	const QUERY_STRING_RETURN_PATH = "return";
+	const QUERY_STRING_CURRENT_PATH = "path";
 
 	/**
 	 * @param Token $token This must be the same instance of the Token when
 	 * creating Authenticator for the first time as it is when checking the
 	 * response from the Authwave provider (store in a session).
-	 * @param string $returnPath
+	 * @param string $currentPath
 	 * @param string $baseUri The base URI of the application. This is the
 	 * URI authority with optional scheme, as localhost allows http://
 	 */
 	public function __construct(
 		Token $token,
-		string $returnPath = "/",
+		string $currentPath = "/",
 		string $baseUri = self::DEFAULT_BASE_URI
 	) {
 		$baseUri = $this->normaliseBaseUri($baseUri);
@@ -30,7 +30,7 @@ class AuthUri extends Uri {
 		$this->query = http_build_query([
 			self::QUERY_STRING_CIPHER => (string)$token->generateCipher(),
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
-			self::QUERY_STRING_RETURN_PATH => base64_encode($returnPath),
+			self::QUERY_STRING_CURRENT_PATH => $currentPath,
 		]);
 	}
 

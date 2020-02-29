@@ -3,9 +3,11 @@ namespace Authwave\Test;
 
 use Authwave\Authenticator;
 use Authwave\AuthUri;
+use Authwave\InitVector;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
+use Authwave\Token;
 use Authwave\UserData;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
@@ -109,5 +111,50 @@ class AuthenticatorTest extends TestCase {
 			$redirectHandler
 		);
 		$sut->login();
+	}
+
+	public function testLoginRedirectsWithCorrectQueryString() {
+		$_SESSION = [];
+
+		$key = uniqid("key-");
+		$secret = uniqid("secret-");
+		$currentPath = uniqid("/path/");
+
+		$cipher = "example-cipher";
+		$ivString = "example-iv";
+
+		$iv = self::createMock(InitVector::class);
+		$iv->method("__toString")
+			->willReturn($ivString);
+
+		$token = self::createMock(Token::class);
+		$token->method("generateCipher")
+			->willReturn($cipher);
+		$token->method("getIv")
+			->willReturn($iv);
+
+		$expectedQueryParts = [
+			AuthUri::QUERY_STRING_CIPHER => $cipher,
+			AuthUri::QUERY_STRING_INIT_VECTOR => $ivString,
+			AuthUri::QUERY_STRING_CURRENT_PATH => $currentPath,
+		];
+		$expectedQuery = http_build_query($expectedQueryParts);
+
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getQuery() === $expectedQuery
+			));
+
+		$sut = new Authenticator(
+			$key,
+			$secret,
+			$currentPath,
+			AuthUri::DEFAULT_BASE_URI,
+			null,
+			$redirectHandler
+		);
+		$sut->login($token);
 	}
 }
