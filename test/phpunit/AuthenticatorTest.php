@@ -10,8 +10,6 @@ use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
 use Authwave\Token;
 use Authwave\UserData;
-use Gt\Session\Session;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 

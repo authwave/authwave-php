@@ -1,7 +1,6 @@
 <?php
 namespace Authwave;
 
-use Authwave\Test\MalformedReponseDataException;
 use JsonException;
 
 class Token {
