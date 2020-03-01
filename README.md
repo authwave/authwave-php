@@ -15,17 +15,15 @@ With the following PHP code below, you can display a log in button that, when cl
 use Authwave\Authenticator;use Gt\Session\SessionArrayWrapper;
 require __DIR__ . "/vendor/autoload.php";
 
-// These constants can be loaded from your application's configuration
-// or environment variables, and must be created within Authwave.
+// This constant can be loaded from your application's configuration
+// or environment variables. They are supplied by the remote Authwave provider.
 define("CLIENT_KEY", "1234567890abcdef");
-define("CLIENT_SECRET", "aaaa-bbbb-cccc-dddd-eeee-ffff");
 
 // Construct the Authenticator class as soon as possible, as this handles the
-// Authentication steps passed bia the query string from the remote provider.
+// Authentication steps passed via the query string from the remote provider.
 $auth = new Authenticator(
         CLIENT_KEY, // See above
-        CLIENT_SECRET, // See above
-        $_SERVER["REQUEST_URI"] // Redirect URI for after login completes
+        $_SERVER["REQUEST_URI"]
 );
 
 // Handle authentication login/logout action via the querystring:
