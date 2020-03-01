@@ -12,7 +12,7 @@ With the following PHP code below, you can display a log in button that, when cl
 
 ```php
 <?php
-use Authwave\Authenticator;use Gt\Session\SessionArrayWrapper;
+use Authwave\Authenticator;
 require __DIR__ . "/vendor/autoload.php";
 
 // This constant can be loaded from your application's configuration
