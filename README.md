@@ -1,7 +1,7 @@
 PHP client library to implement Authwave in your application
 ============================================================
 
-Authwave is an open source Authentication-as-a-Service product that can be self-hosted. Using Authwave allows your application to offer authentication with great user experience and security, without you having to program any of the authentication yourself.
+Authwave is an open source Identity-as-a-Service product that can be self-hosted. Using Authwave allows your application to offer authentication with great user experience and security, without you having to program any of the authentication yourself.
 
 To use this repository, your application must be registered to obtain a client key (see example below). This can be done from https://www.authwave.com or from your own instance of [Authwave Provider](https://github.com/Authwave/provider) if you are self-hosting.
 
