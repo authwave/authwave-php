@@ -9,15 +9,20 @@ class Authenticator {
 	const RESPONSE_QUERY_PARAMETER = "AUTHWAVE_RESPONSE_DATA";
 
 	private string $clientKey;
-	private string $currentUriPath;
+	private string $clientPath;
 	private string $authwaveHost;
 	private SessionContainer $session;
 	private SessionData $sessionData;
 	private RedirectHandler $redirectHandler;
+	/**
+	 * @var string
+	 */
+	private string $clientHost;
 
 	public function __construct(
 		string $clientKey,
-		string $currentUriPath,
+		string $clientHost,
+		string $clientPath,
 		string $authwaveHost = "login.authwave.com",
 		SessionContainer $session = null,
 		RedirectHandler $redirectHandler = null
@@ -33,7 +38,8 @@ class Authenticator {
 		}
 
 		$this->clientKey = $clientKey;
-		$this->currentUriPath = $currentUriPath;
+		$this->clientHost = $clientHost;
+		$this->clientPath = $clientPath;
 		$this->authwaveHost = $authwaveHost;
 		$this->session = $session;
 		$this->sessionData = $session->get(self::SESSION_KEY);
@@ -69,7 +75,7 @@ class Authenticator {
 
 		$loginUri = new AuthUri(
 			$token,
-			$this->currentUriPath,
+			$this->clientPath,
 			$this->authwaveHost
 		);
 		$this->redirectHandler->redirect($loginUri);
@@ -105,14 +111,14 @@ class Authenticator {
 		);
 
 		$this->redirectHandler->redirect(
-			(new Uri($this->currentUriPath))
+			(new Uri($this->clientPath))
 			->withoutQueryValue(self::RESPONSE_QUERY_PARAMETER)
 		);
 	}
 
 	private function getResponseCipher():?string {
 		$queryString = parse_url(
-			$this->currentUriPath,
+			$this->clientPath,
 			PHP_URL_QUERY
 		);
 		if(!$queryString) {

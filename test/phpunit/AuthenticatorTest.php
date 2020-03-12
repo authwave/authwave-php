@@ -16,12 +16,20 @@ use Psr\Http\Message\UriInterface;
 class AuthenticatorTest extends TestCase {
 	public function testConstructWithDefaultSessionNotStarted() {
 		self::expectException(SessionNotStartedException::class);
-		new Authenticator("test-key","/");
+		new Authenticator(
+			"test-key",
+			"example.com",
+			"/"
+		);
 	}
 
 	public function testConstructWithDefaultSession() {
 		$_SESSION = [];
-		new Authenticator("test-key", "/");
+		new Authenticator(
+			"test-key",
+			"example.com",
+			"/"
+		);
 		self::assertArrayHasKey(
 			Authenticator::SESSION_KEY,
 			$_SESSION
@@ -32,6 +40,7 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/"
 		);
 		self::assertFalse($sut->isLoggedIn());
@@ -50,7 +59,8 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
-			"/",
+			"example.com",
+			"/"
 		);
 		self::assertTrue($sut->isLoggedIn());
 	}
@@ -63,7 +73,8 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
-			"/",
+			"example.com",
+			"/"
 		);
 		$sut->logout();
 		self::assertEmpty($_SESSION);
@@ -81,6 +92,7 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/",
 			AuthUri::DEFAULT_BASE_URI,
 			null,
@@ -103,6 +115,7 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/",
 			"http://localhost:8081",
 			null,
@@ -146,6 +159,7 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			$key,
+			"example.com",
 			$currentPath,
 			AuthUri::DEFAULT_BASE_URI,
 			null,
@@ -166,6 +180,7 @@ class AuthenticatorTest extends TestCase {
 
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/",
 			AuthUri::DEFAULT_BASE_URI,
 			null,
@@ -179,6 +194,7 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/"
 		);
 		self::expectException(NotLoggedInException::class);
@@ -200,6 +216,7 @@ class AuthenticatorTest extends TestCase {
 		];
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/"
 		);
 		self::assertEquals($expectedUuid, $sut->getUuid());
@@ -209,6 +226,7 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/"
 		);
 		self::expectException(NotLoggedInException::class);
@@ -230,6 +248,7 @@ class AuthenticatorTest extends TestCase {
 		];
 		$sut = new Authenticator(
 			"test-key",
+			"example.com",
 			"/"
 		);
 		self::assertEquals($expectedEmail, $sut->getEmail());
@@ -244,6 +263,7 @@ class AuthenticatorTest extends TestCase {
 		self::expectException(NotLoggedInException::class);
 		new Authenticator(
 			"test-key",
+			"example.com",
 			$currentUri
 		);
 	}
@@ -276,6 +296,7 @@ class AuthenticatorTest extends TestCase {
 		];
 		new Authenticator(
 			"test-key",
+			"example.com",
 			$currentUri,
 			AuthUri::DEFAULT_BASE_URI,
 			null,
@@ -303,6 +324,7 @@ class AuthenticatorTest extends TestCase {
 
 		new Authenticator(
 			"test-key",
+			"example.com",
 			"/example-path?filter=something",
 			AuthUri::DEFAULT_BASE_URI,
 			null,
