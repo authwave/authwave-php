@@ -14,8 +14,10 @@ class Authenticator {
 	private SessionContainer $session;
 	private SessionData $sessionData;
 	private RedirectHandler $redirectHandler;
+	private string $clientId;
 
 	public function __construct(
+		string $clientId,
 		string $clientKey,
 		string $currentUriPath,
 		string $authwaveHost = "login.authwave.com",
@@ -32,6 +34,7 @@ class Authenticator {
 			$session->set(self::SESSION_KEY, new SessionData());
 		}
 
+		$this->clientId = $clientId;
 		$this->clientKey = $clientKey;
 		$this->currentUriPath = $currentUriPath;
 		$this->authwaveHost = $authwaveHost;
@@ -69,6 +72,7 @@ class Authenticator {
 
 		$loginUri = new AuthUri(
 			$token,
+			$this->clientId,
 			$this->currentUriPath,
 			$this->authwaveHost
 		);
