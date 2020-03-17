@@ -1,11 +1,10 @@
 <?php
-namespace Authwave;
+namespace Authwave\ProviderUri;
 
+use Authwave\Token;
 use Gt\Http\Uri;
 
-class AuthUri extends Uri {
-	const DEFAULT_BASE_REMOTE_URI = "login.authwave.com";
-
+class AuthUri extends AbstractProviderUri {
 	const QUERY_STRING_ID = "id";
 	const QUERY_STRING_CIPHER = "cipher";
 	const QUERY_STRING_INIT_VECTOR = "iv";
@@ -35,26 +34,5 @@ class AuthUri extends Uri {
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
 			self::QUERY_STRING_CURRENT_PATH => $currentPath,
 		]);
-	}
-
-	private function normaliseBaseUri(string $baseUri):Uri {
-		$scheme = parse_url($baseUri, PHP_URL_SCHEME)
-			?? "https";
-		$host = parse_url($baseUri, PHP_URL_HOST)
-			?? parse_url($baseUri, PHP_URL_PATH);
-		$port = parse_url($baseUri, PHP_URL_PORT)
-			?? 80;
-
-		$uri = (new Uri())
-			->withScheme($scheme)
-			->withHost($host)
-			->withPort($port);
-
-		if($uri->getHost() !== "localhost"
-		&& $uri->getScheme() !== "https") {
-			throw new InsecureProtocolException($uri->getScheme());
-		}
-
-		return $uri;
 	}
 }

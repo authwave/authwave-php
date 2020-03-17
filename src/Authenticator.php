@@ -1,8 +1,11 @@
 <?php
 namespace Authwave;
 
+use Authwave\ProviderUri\AdminUri;
+use Authwave\ProviderUri\AuthUri;
 use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
+use Psr\Http\Message\UriInterface;
 
 class Authenticator {
 	const SESSION_KEY = "AUTHWAVE_SESSION";
@@ -70,13 +73,7 @@ class Authenticator {
 		$this->sessionData = new SessionData($token);
 		$this->session->set(self::SESSION_KEY, $this->sessionData);
 
-		$loginUri = new AuthUri(
-			$token,
-			$this->clientId,
-			$this->currentUriPath,
-			$this->authwaveHost
-		);
-		$this->redirectHandler->redirect($loginUri);
+		$this->redirectHandler->redirect($this->getAuthUri($token));
 	}
 
 	public function logout():void {
@@ -92,6 +89,24 @@ class Authenticator {
 	public function getEmail():string {
 		$userData = $this->sessionData->getUserData();
 		return $userData->getEmail();
+	}
+
+	public function getAuthUri(Token $token):AuthUri {
+		return new AuthUri(
+			$token,
+			$this->clientId,
+			$this->currentUriPath,
+			$this->authwaveHost
+		);
+	}
+
+	public function getAdminUri(
+		string $path = AdminUri::PATH_ACCOUNT
+	):UriInterface {
+		return new AdminUri(
+			$this->authwaveHost,
+			$path
+		);
 	}
 
 	private function completeAuth():void {

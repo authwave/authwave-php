@@ -2,9 +2,10 @@
 namespace Authwave\Test;
 
 use Authwave\Authenticator;
-use Authwave\AuthUri;
 use Authwave\InitVector;
 use Authwave\NotLoggedInException;
+use Authwave\ProviderUri\AdminUri;
+use Authwave\ProviderUri\AuthUri;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
@@ -331,6 +332,37 @@ class AuthenticatorTest extends TestCase {
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
+		);
+	}
+
+	public function testGetAdminUri() {
+		$_SESSION = [];
+		$auth = new Authenticator(
+			"example-app-id",
+			"test-key",
+			"/example-path",
+			AuthUri::DEFAULT_BASE_REMOTE_URI
+		);
+		$sut = $auth->getAdminUri();
+		self::assertEquals(
+			AdminUri::PATH_ACCOUNT,
+			$sut->getPath()
+		);
+	}
+
+	public function testGetAdminUriCustom() {
+		$_SESSION = [];
+		$auth = new Authenticator(
+			"example-app-id",
+			"test-key",
+			"/example-path",
+			AuthUri::DEFAULT_BASE_REMOTE_URI
+		);
+		$path = "/custom-path";
+		$sut = $auth->getAdminUri($path);
+		self::assertEquals(
+			$path,
+			$sut->getPath()
 		);
 	}
 }
