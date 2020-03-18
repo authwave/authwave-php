@@ -67,7 +67,7 @@ class AuthenticatorTest extends TestCase {
 		self::assertTrue($sut->isLoggedIn());
 	}
 
-	public function testLogoutClearsSession() {
+	public function testLogoutClearsSessionAndRedirects() {
 		$sessionData = self::createMock(SessionData::class);
 		$_SESSION = [
 			Authenticator::SESSION_KEY => $sessionData
@@ -79,6 +79,7 @@ class AuthenticatorTest extends TestCase {
 			->with(self::callback(fn(UriInterface $uri) =>
 				$uri->getHost() === AuthUri::DEFAULT_BASE_REMOTE_URI
 				&& $uri->getPath() === LogoutUri::PATH_LOGOUT
+				&& $uri->getQuery() === "returnTo=" . urlencode("/")
 			));
 
 		$sut = new Authenticator(
