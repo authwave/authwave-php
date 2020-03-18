@@ -111,8 +111,12 @@ class Authenticator {
 		);
 	}
 
-	public function getLogoutUri():UriInterface {
-		return new LogoutUri($this->authwaveHost);
+	public function getLogoutUri(string $returnToPath = null):UriInterface {
+		if(is_null($returnToPath)) {
+			$returnToPath = $this->currentUriPath;
+		}
+
+		return new LogoutUri($this->authwaveHost, $returnToPath);
 	}
 
 	private function completeAuth():void {

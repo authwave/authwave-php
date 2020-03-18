@@ -74,12 +74,6 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$redirectHandler = self::createMock(RedirectHandler::class);
-		$redirectHandler->expects(self::once())
-			->method("redirect")
-			->with(self::callback(fn(UriInterface $uri) =>
-				$uri->getHost() === AuthUri::DEFAULT_BASE_REMOTE_URI
-				&& $uri->getPath() === LogoutUri::PATH_LOGOUT
-			));
 
 		$sut = new Authenticator(
 			"example-app-id",
@@ -91,6 +85,30 @@ class AuthenticatorTest extends TestCase {
 		);
 		$sut->logout();
 		self::assertEmpty($_SESSION);
+	}
+
+	public function testLogoutRedirectsToCurrentPath() {
+		$_SESSION = [];
+		$currentPath = "/current/example/path";
+
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getHost() === AuthUri::DEFAULT_BASE_REMOTE_URI
+				&& $uri->getPath() === LogoutUri::PATH_LOGOUT
+				&& $uri->getQuery() === "returnTo=" . urlencode($currentPath)
+			));
+
+		$sut = new Authenticator(
+			"example-app-id",
+			"test-key",
+			$currentPath,
+			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			null,
+			$redirectHandler
+		);
+		$sut->logout();
 	}
 
 	public function testLoginRedirects() {
