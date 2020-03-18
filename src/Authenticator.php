@@ -3,6 +3,7 @@ namespace Authwave;
 
 use Authwave\ProviderUri\AdminUri;
 use Authwave\ProviderUri\AuthUri;
+use Authwave\ProviderUri\LogoutUri;
 use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
 use Psr\Http\Message\UriInterface;
@@ -79,6 +80,7 @@ class Authenticator {
 	public function logout():void {
 // TODO: Should the logout redirect the user agent to the redirectPath?
 		$this->session->remove(self::SESSION_KEY);
+		$this->redirectHandler->redirect($this->getLogoutUri());
 	}
 
 	public function getUuid():string {
@@ -107,6 +109,10 @@ class Authenticator {
 			$this->authwaveHost,
 			$path
 		);
+	}
+
+	public function getLogoutUri():UriInterface {
+		return new LogoutUri($this->authwaveHost);
 	}
 
 	private function completeAuth():void {
