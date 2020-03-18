@@ -72,10 +72,15 @@ class AuthenticatorTest extends TestCase {
 			Authenticator::SESSION_KEY => $sessionData
 		];
 
+		$redirectHandler = self::createMock(RedirectHandler::class);
+
 		$sut = new Authenticator(
 			"example-app-id",
 			"test-key",
-			"/"
+			"/",
+			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			null,
+			$redirectHandler
 		);
 		$sut->logout();
 		self::assertEmpty($_SESSION);

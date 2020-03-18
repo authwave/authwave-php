@@ -1,0 +1,12 @@
+<?php
+namespace Authwave\ProviderUri;
+
+class LogoutUri extends AbstractProviderUri {
+	const PATH_LOGOUT = "/logout";
+
+	public function __construct(string $baseRemoteUri) {
+		$baseRemoteUri = $this->normaliseBaseUri($baseRemoteUri);
+		parent::__construct($baseRemoteUri);
+		$this->path = self::PATH_LOGOUT;
+	}
+}
