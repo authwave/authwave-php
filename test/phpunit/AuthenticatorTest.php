@@ -6,6 +6,7 @@ use Authwave\InitVector;
 use Authwave\NotLoggedInException;
 use Authwave\ProviderUri\AdminUri;
 use Authwave\ProviderUri\AuthUri;
+use Authwave\ProviderUri\LogoutUri;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
@@ -73,6 +74,12 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getHost() === AuthUri::DEFAULT_BASE_REMOTE_URI
+				&& $uri->getPath() === LogoutUri::PATH_LOGOUT
+			));
 
 		$sut = new Authenticator(
 			"example-app-id",
