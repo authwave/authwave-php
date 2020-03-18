@@ -15,15 +15,17 @@ With the following PHP code below, you can display a log in button that, when cl
 use Authwave\Authenticator;
 require __DIR__ . "/vendor/autoload.php";
 
-// This constant can be loaded from your application's configuration
-// or environment variables. They are supplied by the remote Authwave provider.
+// These constants can be loaded from your application's configuration
+// or environment variables. They are created in the remote Authwave provider.
+define("CLIENT_ID", "my-secure-application");
 define("CLIENT_KEY", "1234567890abcdef");
 
 // Construct the Authenticator class as soon as possible, as this handles the
 // Authentication steps passed via the query string from the remote provider.
 $auth = new Authenticator(
-        CLIENT_KEY, // See above
-        $_SERVER["REQUEST_URI"]
+	CLIENT_ID,
+	CLIENT_KEY,
+	$_SERVER["REQUEST_URI"]
 );
 
 // Handle authentication login/logout action via the querystring:
@@ -32,24 +34,24 @@ if(isset($_GET["login"])) {
 // remote provider. The remote provider will in turn redirect the user agent
 // back to the return URI (set as 3rd parameter of Authenticator's constructor),
 // at which point the user will be considered authenticated.
-       $auth->login();
+	$auth->login();
 }
 elseif(isset($_GET["logout"])) {
-        $auth->logout();
+	$auth->logout();
 }
 
 // Authentication is handled by Authwave, so you can trust "isLoggedIn"
 // as a mechanism for protecting your sensitive information.
 if($auth->isLoggedIn()) {
-        echo <<<HTML
-            <p>You are logged in as <strong>{$auth->getEmail()}</strong></p>
-            <p><a href="?logout">Log out</a></p>
-        HTML;
+	echo <<<HTML
+		<p>You are logged in as <strong>{$auth->getEmail()}</strong></p>
+		<p><a href="?logout">Log out</a></p>
+	HTML;
 }
 else {
-        echo <<<HTML
-            <p>You are not logged in!</p>
-            <p><a href="?login">Log in</a></p>
-        HTML;
+	echo <<<HTML
+		<p>You are not logged in!</p>
+		<p><a href="?login">Log in</a></p>
+	HTML;
 }
 ```
