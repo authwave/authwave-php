@@ -5,7 +5,6 @@ use Authwave\Token;
 use Gt\Http\Uri;
 
 class AuthUri extends AbstractProviderUri {
-	const QUERY_STRING_ID = "id";
 	const QUERY_STRING_CIPHER = "cipher";
 	const QUERY_STRING_INIT_VECTOR = "iv";
 	const QUERY_STRING_CURRENT_PATH = "path";
@@ -21,7 +20,6 @@ class AuthUri extends AbstractProviderUri {
 	 */
 	public function __construct(
 		Token $token,
-		string $clientId,
 		string $currentPath = "/",
 		string $baseRemoteUri = self::DEFAULT_BASE_REMOTE_URI
 	) {
@@ -29,7 +27,6 @@ class AuthUri extends AbstractProviderUri {
 		parent::__construct($baseRemoteUri);
 
 		$this->query = http_build_query([
-			self::QUERY_STRING_ID => $clientId,
 			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher(),
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
 			self::QUERY_STRING_CURRENT_PATH => $currentPath,

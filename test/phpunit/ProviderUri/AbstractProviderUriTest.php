@@ -17,7 +17,6 @@ class AbstractProviderUriTest extends TestCase {
 
 		$sut = new AuthUri(
 			$token,
-			"example-app-id",
 			"",
 			$baseUri
 		);
@@ -33,7 +32,6 @@ class AbstractProviderUriTest extends TestCase {
 		$token = self::createMock(Token::class);
 		$sut = new AuthUri(
 			$token,
-			"example-app-id",
 			"/",
 			"localhost"
 		);
@@ -49,7 +47,6 @@ class AbstractProviderUriTest extends TestCase {
 		$token = self::createMock(Token::class);
 		$sut = new AuthUri(
 			$token,
-			"example-app-id",
 			"/",
 			"http://localhost"
 		);
@@ -65,7 +62,6 @@ class AbstractProviderUriTest extends TestCase {
 		self::expectException(InsecureProtocolException::class);
 		new AuthUri(
 			$token,
-			"example-app-id",
 			"/",
 			"http://localhost.com"
 		);
@@ -80,7 +76,6 @@ class AbstractProviderUriTest extends TestCase {
 
 		$sut = new AuthUri(
 			$token,
-			"example-app-id",
 			"/",
 			$baseUri);
 

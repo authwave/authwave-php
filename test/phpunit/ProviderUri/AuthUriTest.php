@@ -25,7 +25,6 @@ class AuthUriTest extends TestCase {
 		$returnPath = "/examplePage";
 		$sut = new AuthUri(
 			$token,
-			"example-app-id",
 			$returnPath,
 			$baseUri
 		);

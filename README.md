@@ -15,15 +15,13 @@ With the following PHP code below, you can display a log in button that, when cl
 use Authwave\Authenticator;
 require __DIR__ . "/vendor/autoload.php";
 
-// These constants can be loaded from your application's configuration
-// or environment variables. They are created in the remote Authwave provider.
-define("CLIENT_ID", "my-secure-application");
+// This constant can be loaded from your application's configuration
+// or environment variables. It is created in the remote Authwave provider.
 define("CLIENT_KEY", "1234567890abcdef");
 
 // Construct the Authenticator class as soon as possible, as this handles the
 // Authentication steps passed via the query string from the remote provider.
 $auth = new Authenticator(
-	CLIENT_ID,
 	CLIENT_KEY,
 	$_SERVER["REQUEST_URI"]
 );

@@ -19,7 +19,6 @@ class AuthenticatorTest extends TestCase {
 	public function testConstructWithDefaultSessionNotStarted() {
 		self::expectException(SessionNotStartedException::class);
 		new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -28,7 +27,6 @@ class AuthenticatorTest extends TestCase {
 	public function testConstructWithDefaultSession() {
 		$_SESSION = [];
 		new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -41,7 +39,6 @@ class AuthenticatorTest extends TestCase {
 	public function testIsLoggedInFalseByDefault() {
 		$_SESSION = [];
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -60,7 +57,6 @@ class AuthenticatorTest extends TestCase {
 		];
 
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -76,7 +72,6 @@ class AuthenticatorTest extends TestCase {
 		$redirectHandler = self::createMock(RedirectHandler::class);
 
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/",
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -101,7 +96,6 @@ class AuthenticatorTest extends TestCase {
 			));
 
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			$currentPath,
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -122,7 +116,6 @@ class AuthenticatorTest extends TestCase {
 			));
 
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/",
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -145,7 +138,6 @@ class AuthenticatorTest extends TestCase {
 			));
 
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/",
 			"http://localhost:8081",
@@ -161,7 +153,6 @@ class AuthenticatorTest extends TestCase {
 		$key = uniqid("key-");
 		$currentPath = uniqid("/path/");
 
-		$id = "example-app-id";
 		$cipher = "example-cipher";
 		$ivString = "example-iv";
 
@@ -176,7 +167,6 @@ class AuthenticatorTest extends TestCase {
 			->willReturn($iv);
 
 		$expectedQueryParts = [
-			AuthUri::QUERY_STRING_ID => $id,
 			AuthUri::QUERY_STRING_CIPHER => $cipher,
 			AuthUri::QUERY_STRING_INIT_VECTOR => $ivString,
 			AuthUri::QUERY_STRING_CURRENT_PATH => $currentPath,
@@ -191,7 +181,6 @@ class AuthenticatorTest extends TestCase {
 			));
 
 		$sut = new Authenticator(
-			$id,
 			$key,
 			$currentPath,
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -212,7 +201,6 @@ class AuthenticatorTest extends TestCase {
 			->method("redirect");
 
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/",
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -226,7 +214,6 @@ class AuthenticatorTest extends TestCase {
 	public function testGetUuidThrowsExceptionWhenNotLoggedIn() {
 		$_SESSION = [];
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -248,7 +235,6 @@ class AuthenticatorTest extends TestCase {
 			Authenticator::SESSION_KEY => $sessionData,
 		];
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -258,7 +244,6 @@ class AuthenticatorTest extends TestCase {
 	public function testGetEmailThrowsExceptionWhenNotLoggedIn() {
 		$_SESSION = [];
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -280,7 +265,6 @@ class AuthenticatorTest extends TestCase {
 			Authenticator::SESSION_KEY => $sessionData,
 		];
 		$sut = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/"
 		);
@@ -295,7 +279,6 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 		self::expectException(NotLoggedInException::class);
 		new Authenticator(
-			"example-app-id",
 			"test-key",
 			$currentUri
 		);
@@ -328,7 +311,6 @@ class AuthenticatorTest extends TestCase {
 			Authenticator::SESSION_KEY => $sessionData,
 		];
 		new Authenticator(
-			"example-app-id",
 			"test-key",
 			$currentUri,
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -356,7 +338,6 @@ class AuthenticatorTest extends TestCase {
 		$_SESSION = [];
 
 		new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/example-path?filter=something",
 			AuthUri::DEFAULT_BASE_REMOTE_URI,
@@ -368,7 +349,6 @@ class AuthenticatorTest extends TestCase {
 	public function testGetAdminUri() {
 		$_SESSION = [];
 		$auth = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/example-path",
 			AuthUri::DEFAULT_BASE_REMOTE_URI
@@ -383,7 +363,6 @@ class AuthenticatorTest extends TestCase {
 	public function testGetAdminUriCustom() {
 		$_SESSION = [];
 		$auth = new Authenticator(
-			"example-app-id",
 			"test-key",
 			"/example-path",
 			AuthUri::DEFAULT_BASE_REMOTE_URI
