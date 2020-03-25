@@ -24,6 +24,30 @@ class AbstractProviderUriTest extends TestCase {
 			"https",
 			$sut->getScheme()
 		);
+		self::assertNull(
+			$sut->getPort()
+		);
+	}
+
+	public function testAuthUriWithNonStandardPort() {
+		$baseUri = self::createMock(UriInterface::class);
+		$baseUri->method("__toString")
+			->willReturn("http://localhost:8081");
+		$token = self::createMock(Token::class);
+
+		$sut = new AuthUri(
+			$token,
+			"",
+			$baseUri
+		);
+		self::assertEquals(
+			"http",
+			$sut->getScheme()
+		);
+		self::assertEquals(
+			8081,
+			$sut->getPort()
+		);
 	}
 
 // All AuthUris MUST be served over HTTPS, with the one exception of localhost.

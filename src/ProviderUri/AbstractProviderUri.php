@@ -13,7 +13,7 @@ abstract class AbstractProviderUri extends Uri {
 		$host = parse_url($baseUri, PHP_URL_HOST)
 			?? parse_url($baseUri, PHP_URL_PATH);
 		$port = parse_url($baseUri, PHP_URL_PORT)
-			?? 80;
+			?? null;
 
 		$uri = (new Uri())
 			->withScheme($scheme)
