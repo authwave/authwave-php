@@ -60,15 +60,10 @@ class Token {
 			throw new ResponseCipherDecryptionException();
 		}
 
-		try {
-			$obj = json_decode(
-				$decrypted,
-				false,
-				2,
-				JSON_THROW_ON_ERROR
-			);
-		}
-		catch(JsonException $exception) {
+		$obj = unserialize(
+			$decrypted
+		);
+		if($obj === false) {
 			throw new InvalidUserDataSerializationException();
 		}
 
