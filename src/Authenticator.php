@@ -109,7 +109,7 @@ class Authenticator {
 
 	public function getLogoutUri(string $returnToPath = null):UriInterface {
 		if(is_null($returnToPath)) {
-			$returnToPath = $this->currentUriPath;
+			$returnToPath = (new Uri($this->currentUriPath))->getPath();
 		}
 
 		return new LogoutUri($this->authwaveHost, $returnToPath);

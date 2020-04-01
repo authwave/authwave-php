@@ -1,8 +1,6 @@
 <?php
 namespace Authwave;
 
-use JsonException;
-
 class Token {
 	const ENCRYPTION_METHOD = "aes128";
 
@@ -48,25 +46,22 @@ class Token {
 		$decrypted = openssl_decrypt(
 			base64_decode($cipher),
 			self::ENCRYPTION_METHOD,
-			implode("|", [
-				$this->key,
-				$this->secretIv->getBytes(),
-			]),
+			$this->key,
 			0,
-			$this->iv->getBytes()
+			$this->secretIv->getBytes()
 		);
 
 		if(!$decrypted) {
 			throw new ResponseCipherDecryptionException();
 		}
 
-		$obj = unserialize(
+		$data = unserialize(
 			$decrypted
 		);
-		if($obj === false) {
+		if($data === false) {
 			throw new InvalidUserDataSerializationException();
 		}
 
-		return new UserData($obj->uuid, $obj->email);
+		return new UserData($data["uuid"], $data["email"]);
 	}
 }
