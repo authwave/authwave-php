@@ -80,6 +80,10 @@ class Authenticator {
 		$this->redirectHandler->redirect($this->getLogoutUri());
 	}
 
+	public function adminLogin():void {
+// TODO: Implement!
+	}
+
 	public function getUuid():string {
 		$userData = $this->sessionData->getUserData();
 		return $userData->getUuid();
@@ -99,7 +103,7 @@ class Authenticator {
 	}
 
 	public function getAdminUri(
-		string $path = AdminUri::PATH_ACCOUNT
+		string $path = AdminUri::PATH_ADMIN
 	):UriInterface {
 		return new AdminUri(
 			$this->authwaveHost,

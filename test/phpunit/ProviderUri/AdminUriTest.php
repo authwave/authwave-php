@@ -8,10 +8,10 @@ class AdminUriTest extends TestCase {
 	public function testPathAccount() {
 		$sut = new AdminUri(
 			"example.com",
-			AdminUri::PATH_ACCOUNT
+			AdminUri::PATH_ADMIN
 		);
 		self::assertEquals(
-			AdminUri::PATH_ACCOUNT,
+			AdminUri::PATH_ADMIN,
 			$sut->getPath()
 		);
 	}

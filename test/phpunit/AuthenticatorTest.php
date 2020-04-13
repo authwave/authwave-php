@@ -355,7 +355,7 @@ class AuthenticatorTest extends TestCase {
 		);
 		$sut = $auth->getAdminUri();
 		self::assertEquals(
-			AdminUri::PATH_ACCOUNT,
+			AdminUri::PATH_ADMIN,
 			$sut->getPath()
 		);
 	}

@@ -2,7 +2,7 @@
 namespace Authwave\ProviderUri;
 
 class AdminUri extends AbstractProviderUri {
-	const PATH_ACCOUNT = "/account";
+	const PATH_ADMIN = "/admin";
 	const PATH_SETTINGS = "/settings";
 
 	public function __construct(

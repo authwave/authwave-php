@@ -65,7 +65,8 @@ class TokenTest extends TestCase {
 	}
 
 	public function testDecryptResponseCipher() {
-		$key = uniqid("test-key-");
+		$clientKey = uniqid("test-key-");
+// SecretIv is stored in the client application's session only.
 		$secretIv = self::createMock(InitVector::class);
 		$secretIv->method("getBytes")
 			->willReturn(str_repeat("0", 16));
@@ -75,22 +76,20 @@ class TokenTest extends TestCase {
 
 		$uuid = "aabb-ccdd-eeff";
 		$email = "user@example.com";
-		$json = <<<JSON
-		{
-			"uuid": "$uuid",
-			"email": "$email"
-		}
-		JSON;
+		$serialized = serialize((object)[
+			"uuid" => $uuid,
+			"email" => $email,
+		]);
 
 		$cipher = openssl_encrypt(
-			$json,
+			$serialized,
 			Token::ENCRYPTION_METHOD,
-			implode("|", [$key, $secretIv->getBytes()]),
+			$clientKey,
 			0,
-			$iv->getBytes()
+			$secretIv->getBytes()
 		);
 		$cipher = base64_encode($cipher);
-		$sut = new Token($key, $secretIv, $iv);
+		$sut = new Token($clientKey, $secretIv, $iv);
 		$userData = $sut->decryptResponseCipher($cipher);
 		self::assertInstanceOf(UserData::class, $userData);
 		self::assertEquals($uuid, $userData->getUuid());

@@ -55,13 +55,13 @@ class Token {
 			throw new ResponseCipherDecryptionException();
 		}
 
-		$data = unserialize(
+		$data = @unserialize(
 			$decrypted
 		);
 		if($data === false) {
 			throw new InvalidUserDataSerializationException();
 		}
 
-		return new UserData($data["uuid"], $data["email"]);
+		return new UserData($data->{"uuid"}, $data->{"email"});
 	}
 }
