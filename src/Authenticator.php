@@ -1,6 +1,7 @@
 <?php
 namespace Authwave;
 
+use Authwave\ProviderUri\AbstractProviderUri;
 use Authwave\ProviderUri\AdminUri;
 use Authwave\ProviderUri\AuthUri;
 use Authwave\ProviderUri\LogoutUri;
@@ -11,6 +12,8 @@ use Psr\Http\Message\UriInterface;
 class Authenticator {
 	const SESSION_KEY = "AUTHWAVE_SESSION";
 	const RESPONSE_QUERY_PARAMETER = "AUTHWAVE_RESPONSE_DATA";
+	const LOGIN_TYPE_DEFAULT = "login-default";
+	const LOGIN_TYPE_ADMIN = "login-admin";
 
 	private string $clientKey;
 	private string $currentUriPath;
@@ -59,7 +62,10 @@ class Authenticator {
 		return isset($userData);
 	}
 
-	public function login(Token $token = null):void {
+	public function login(
+		Token $token = null,
+		string $loginType = self::LOGIN_TYPE_DEFAULT
+	):void {
 		if($this->isLoggedIn()) {
 			return;
 		}
@@ -71,17 +77,18 @@ class Authenticator {
 		$this->sessionData = new SessionData($token);
 		$this->session->set(self::SESSION_KEY, $this->sessionData);
 
-		$this->redirectHandler->redirect($this->getAuthUri($token));
+		$this->redirectHandler->redirect(
+			$this->getAuthUri($token, $loginType)
+		);
 	}
 
 	public function logout():void {
 // TODO: Should the logout redirect the user agent to the redirectPath?
 		$this->session->remove(self::SESSION_KEY);
-		$this->redirectHandler->redirect($this->getLogoutUri());
 	}
 
-	public function adminLogin():void {
-// TODO: Implement!
+	public function adminLogin(Token $token = null):void {
+		$this->login($token, self::LOGIN_TYPE_ADMIN);
 	}
 
 	public function getUuid():string {
@@ -94,7 +101,22 @@ class Authenticator {
 		return $userData->getEmail();
 	}
 
-	public function getAuthUri(Token $token):AuthUri {
+	public function getField(string $name):?string {
+		$userData = $this->sessionData->getUserData();
+		return $userData->getField($name);
+	}
+
+	public function getAuthUri(
+		Token $token,
+		string $loginType = self::LOGIN_TYPE_DEFAULT
+	):AbstractProviderUri {
+		if($loginType === self::LOGIN_TYPE_ADMIN) {
+			return new AdminUri(
+				$this->currentUriPath,
+				$this->authwaveHost
+			);
+		}
+
 		return new AuthUri(
 			$token,
 			$this->currentUriPath,
@@ -111,12 +133,13 @@ class Authenticator {
 		);
 	}
 
-	public function getLogoutUri(string $returnToPath = null):UriInterface {
-		if(is_null($returnToPath)) {
-			$returnToPath = (new Uri($this->currentUriPath))->getPath();
-		}
-
-		return new LogoutUri($this->authwaveHost, $returnToPath);
+	public function getProfileUri(
+		string $path = ProfileUri::PATH_PROFILE
+	):UriInterface {
+		return new ProfileUri(
+			$this->authwaveHost,
+			$path
+		);
 	}
 
 	private function completeAuth():void {

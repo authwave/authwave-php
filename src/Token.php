@@ -1,6 +1,8 @@
 <?php
 namespace Authwave;
 
+use stdClass;
+
 class Token {
 	const ENCRYPTION_METHOD = "aes128";
 
@@ -62,6 +64,10 @@ class Token {
 			throw new InvalidUserDataSerializationException();
 		}
 
-		return new UserData($data->{"uuid"}, $data->{"email"});
+		return new UserData(
+			$data->{"uuid"},
+			$data->{"email"},
+			$data->{"fields"} ?? new StdClass()
+		);
 	}
 }
