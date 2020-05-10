@@ -332,22 +332,7 @@ class AuthenticatorTest extends TestCase {
 		);
 		$sut = $auth->getAdminUri();
 		self::assertEquals(
-			AdminUri::PATH_ADMIN,
-			$sut->getPath()
-		);
-	}
-
-	public function testGetAdminUriCustom() {
-		$_SESSION = [];
-		$auth = new Authenticator(
-			"test-key",
-			"/example-path",
-			AuthUri::DEFAULT_BASE_REMOTE_URI
-		);
-		$path = "/custom-path";
-		$sut = $auth->getAdminUri($path);
-		self::assertEquals(
-			$path,
+			"/admin",
 			$sut->getPath()
 		);
 	}

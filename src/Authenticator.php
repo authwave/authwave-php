@@ -38,12 +38,14 @@ class Authenticator {
 // need to store it to the current session at all?
 			$session->set(self::SESSION_KEY, new SessionData());
 		}
+		/** @var SessionData $sessionData*/
+		$sessionData = $session->get(self::SESSION_KEY);
 
 		$this->clientKey = $clientKey;
 		$this->currentUriPath = $currentUriPath;
 		$this->authwaveHost = $authwaveHost;
 		$this->session = $session;
-		$this->sessionData = $session->get(self::SESSION_KEY);
+		$this->sessionData = $sessionData;
 		$this->redirectHandler = $redirectHandler ?? new RedirectHandler();
 
 		$this->completeAuth();
@@ -62,10 +64,7 @@ class Authenticator {
 		return isset($userData);
 	}
 
-	public function login(
-		Token $token = null,
-		string $loginType = self::LOGIN_TYPE_DEFAULT
-	):void {
+	public function login(Token $token = null):void {
 		if($this->isLoggedIn()) {
 			return;
 		}
@@ -77,18 +76,15 @@ class Authenticator {
 		$this->sessionData = new SessionData($token);
 		$this->session->set(self::SESSION_KEY, $this->sessionData);
 
-		$this->redirectHandler->redirect(
-			$this->getAuthUri($token, $loginType)
-		);
+		$this->redirectHandler->redirect($this->getAuthUri($token));
 	}
 
-	public function logout():void {
-// TODO: Should the logout redirect the user agent to the redirectPath?
+	public function logout(string $redirectToPath = "/"):void {
 		$this->session->remove(self::SESSION_KEY);
-	}
 
-	public function adminLogin(Token $token = null):void {
-		$this->login($token, self::LOGIN_TYPE_ADMIN);
+		$uri = (new Uri())
+			->withPath($redirectToPath);
+		$this->redirectHandler->redirect($uri);
 	}
 
 	public function getUuid():string {
@@ -106,17 +102,7 @@ class Authenticator {
 		return $userData->getField($name);
 	}
 
-	public function getAuthUri(
-		Token $token,
-		string $loginType = self::LOGIN_TYPE_DEFAULT
-	):AbstractProviderUri {
-		if($loginType === self::LOGIN_TYPE_ADMIN) {
-			return new AdminUri(
-				$this->currentUriPath,
-				$this->authwaveHost
-			);
-		}
-
+	public function getAuthUri(Token $token):AbstractProviderUri {
 		return new AuthUri(
 			$token,
 			$this->currentUriPath,
