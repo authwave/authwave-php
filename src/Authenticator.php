@@ -4,6 +4,7 @@ namespace Authwave;
 use Authwave\ProviderUri\AbstractProviderUri;
 use Authwave\ProviderUri\AdminUri;
 use Authwave\ProviderUri\AuthUri;
+use Authwave\ProviderUri\ProfileUri;
 use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
 use Psr\Http\Message\UriInterface;
@@ -123,22 +124,12 @@ class Authenticator {
 		);
 	}
 
-	public function getAdminUri(
-		string $path = AdminUri::PATH_ADMIN
-	):UriInterface {
-		return new AdminUri(
-			$this->authwaveHost,
-			$path
-		);
+	public function getAdminUri():UriInterface {
+		return new AdminUri($this->authwaveHost);
 	}
 
-	public function getProfileUri(
-		string $path = ProfileUri::PATH_PROFILE
-	):UriInterface {
-		return new ProfileUri(
-			$this->authwaveHost,
-			$path
-		);
+	public function getProfileUri():UriInterface {
+		return new ProfileUri($this->authwaveHost);
 	}
 
 	private function completeAuth():void {
