@@ -79,6 +79,9 @@ class TokenTest extends TestCase {
 		$serialized = serialize((object)[
 			"uuid" => $uuid,
 			"email" => $email,
+			"fields" => (object)[
+				"example1" => "value1",
+			]
 		]);
 
 		$cipher = openssl_encrypt(

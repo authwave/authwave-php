@@ -62,6 +62,10 @@ class Token {
 			throw new InvalidUserDataSerializationException();
 		}
 
-		return new UserData($data->{"uuid"}, $data->{"email"});
+		return new UserData(
+			$data->{"uuid"},
+			$data->{"email"},
+			$data->{"fields"}
+		);
 	}
 }
