@@ -1,7 +1,7 @@
 <?php
-namespace Authwave;
+namespace Authwave\ResponseData;
 
-class UserData {
+class UserData extends AbstractResponseData {
 	private string $uuid;
 	private string $email;
 	private object $fields;
@@ -9,11 +9,14 @@ class UserData {
 	public function __construct(
 		string $uuid,
 		string $email,
-		object $fields
+		object $fields,
+		string $message = null
 	) {
 		$this->uuid = $uuid;
 		$this->email = $email;
 		$this->fields = $fields;
+
+		parent::__construct($message);
 	}
 
 	public function getUuid():string {

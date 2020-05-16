@@ -41,7 +41,7 @@ class LoginUriTest extends TestCase {
 		);
 
 		self::assertEquals(
-			$returnPath,
+			bin2hex($returnPath),
 			$queryParts[LoginUri::QUERY_STRING_CURRENT_PATH]
 		);
 	}

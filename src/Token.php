@@ -1,7 +1,9 @@
 <?php
 namespace Authwave;
 
-use stdClass;
+use Authwave\ResponseData\AbstractResponseData;
+use Authwave\ResponseData\UserData;
+use StdClass;
 
 class Token {
 	const ENCRYPTION_METHOD = "aes128";
@@ -53,7 +55,7 @@ class Token {
 // application after a successful authentication and includes a serialised
 // UserData object, encrypted using the secret IV, which was created when
 // encrypting the original request cipher.
-	public function decryptResponseCipher(string $cipher):UserData {
+	public function decryptResponseCipher(string $cipher):AbstractResponseData {
 		$decrypted = openssl_decrypt(
 			base64_decode($cipher),
 			self::ENCRYPTION_METHOD,

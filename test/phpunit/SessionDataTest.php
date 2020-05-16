@@ -4,7 +4,7 @@ namespace Authwave\Test;
 use Authwave\NotLoggedInException;
 use Authwave\SessionData;
 use Authwave\Token;
-use Authwave\UserData;
+use Authwave\ResponseData\UserData;
 use PHPUnit\Framework\TestCase;
 
 class SessionDataTest extends TestCase {
@@ -23,13 +23,13 @@ class SessionDataTest extends TestCase {
 	public function testGetUserDataNull() {
 		$sut = new SessionData();
 		self::expectException(NotLoggedInException::class);
-		$sut->getUserData();
+		$sut->getData();
 	}
 
 	public function testGetUserData() {
 		$token = self::createMock(Token::class);
 		$userData = self::createMock(UserData::class);
 		$sut = new SessionData($token, $userData);
-		self::assertSame($userData, $sut->getUserData());
+		self::assertSame($userData, $sut->getData());
 	}
 }

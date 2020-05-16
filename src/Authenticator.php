@@ -4,6 +4,7 @@ namespace Authwave;
 use Authwave\ProviderUri\AbstractProviderUri;
 use Authwave\ProviderUri\AdminUri;
 use Authwave\ProviderUri\LoginUri;
+use Authwave\ProviderUri\LogoutUri;
 use Authwave\ProviderUri\ProfileUri;
 use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
@@ -55,7 +56,7 @@ class Authenticator {
 		$userData = null;
 
 		try {
-			$userData = $this->sessionData->getUserData();
+			$userData = $this->sessionData->getData();
 		}
 		catch(NotLoggedInException $exception) {
 			return false;
@@ -91,17 +92,17 @@ class Authenticator {
 	}
 
 	public function getUuid():string {
-		$userData = $this->sessionData->getUserData();
+		$userData = $this->sessionData->getData();
 		return $userData->getUuid();
 	}
 
 	public function getEmail():string {
-		$userData = $this->sessionData->getUserData();
+		$userData = $this->sessionData->getData();
 		return $userData->getEmail();
 	}
 
 	public function getField(string $name):?string {
-		$userData = $this->sessionData->getUserData();
+		$userData = $this->sessionData->getData();
 		return $userData->getField($name);
 	}
 
@@ -151,8 +152,6 @@ class Authenticator {
 			self::SESSION_KEY,
 			new SessionData($token, $userData)
 		);
-
-		setcookie("authwave-trackshift", "test", 0, "/", "localhost");
 
 		$this->redirectHandler->redirect(
 			(new Uri($this->currentUriPath))

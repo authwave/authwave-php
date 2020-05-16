@@ -5,7 +5,7 @@ use Authwave\InitVector;
 use Authwave\InvalidUserDataSerializationException;
 use Authwave\ResponseCipherDecryptionException;
 use Authwave\Token;
-use Authwave\UserData;
+use Authwave\ResponseData\UserData;
 use PHPUnit\Framework\TestCase;
 
 class TokenTest extends TestCase {
