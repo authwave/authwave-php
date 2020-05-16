@@ -2,12 +2,12 @@
 namespace Authwave\Test\ProviderUri;
 
 use Authwave\InitVector;
-use Authwave\ProviderUri\AuthUri;
+use Authwave\ProviderUri\LoginUri;
 use Authwave\Token;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 
-class AuthUriTest extends TestCase {
+class LoginUriTest extends TestCase {
 	public function testQueryString() {
 		$mockCipherValue = str_repeat("f", 16);
 		$mockIvValue = str_repeat("0", 16);
@@ -23,7 +23,7 @@ class AuthUriTest extends TestCase {
 			->willReturn($iv);
 
 		$returnPath = "/examplePage";
-		$sut = new AuthUri(
+		$sut = new LoginUri(
 			$token,
 			$returnPath,
 			$baseUri
@@ -32,17 +32,17 @@ class AuthUriTest extends TestCase {
 
 		self::assertEquals(
 			$mockCipherValue,
-			$queryParts[AuthUri::QUERY_STRING_CIPHER],
+			$queryParts[LoginUri::QUERY_STRING_CIPHER],
 		);
 
 		self::assertEquals(
 			$mockIvValue,
-			$queryParts[AuthUri::QUERY_STRING_INIT_VECTOR]
+			$queryParts[LoginUri::QUERY_STRING_INIT_VECTOR]
 		);
 
 		self::assertEquals(
 			$returnPath,
-			$queryParts[AuthUri::QUERY_STRING_CURRENT_PATH]
+			$queryParts[LoginUri::QUERY_STRING_CURRENT_PATH]
 		);
 	}
 }

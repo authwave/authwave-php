@@ -24,13 +24,22 @@ class Token {
 		return $this->iv;
 	}
 
-// The request cipher is sent to the remote provider in the querystring. It
-// consists of the secret IV, encrypted with the client key. The remote provider
-// will decrypt the secret and use it as the key when encrypting the response
-// cipher, which will be sent back to the client application in the querystring.
-	public function generateRequestCipher():string {
+/**
+ * The request cipher is sent to the remote provider in the querystring. It
+ * consists of the token's secret IV, encrypted with the client key, along with
+ * an optional message. The secret IV is required for two-way encryption. The
+ * remote provider will decrypt the secret and use it as the key if encrypting a
+ * response cipher, which will be sent back to the client application in the
+ * querystring.
+ */
+	public function generateRequestCipher(string $message = null):string {
+		$data = $this->secretIv;
+		if($message) {
+			$data .= "|" . $message;
+		}
+
 		$rawCipher = openssl_encrypt(
-			$this->secretIv,
+			$data,
 			self::ENCRYPTION_METHOD,
 			$this->key,
 			0,

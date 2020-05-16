@@ -4,11 +4,13 @@ namespace Authwave\ProviderUri;
 use Authwave\Token;
 use Gt\Http\Uri;
 
-class AuthUri extends AbstractProviderUri {
-	const QUERY_STRING_CIPHER = "cipher";
-	const QUERY_STRING_INIT_VECTOR = "iv";
-	const QUERY_STRING_CURRENT_PATH = "path";
-
+/**
+ * The AuthUri class represents the Uri used to redirect the user agent to the
+ * Authwave provider in order to initiate authentication. A Token is used to
+ * pass the secret IV to the provider, encrypted with the API key. The secret
+ * IV is only ever stored in the client's session, and is unique to the session.
+ */
+class LoginUri extends AbstractProviderUri {
 	/**
 	 * @param Token $token This must be the same instance of the Token when
 	 * creating Authenticator for the first time as it is when checking the
@@ -25,11 +27,6 @@ class AuthUri extends AbstractProviderUri {
 	) {
 		$baseRemoteUri = $this->normaliseBaseUri($baseRemoteUri);
 		parent::__construct($baseRemoteUri);
-
-		$this->query = http_build_query([
-			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher(),
-			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
-			self::QUERY_STRING_CURRENT_PATH => $currentPath,
-		]);
+		$this->query = $this->buildQuery($token, $currentPath);
 	}
 }

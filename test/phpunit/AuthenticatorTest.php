@@ -5,7 +5,7 @@ use Authwave\Authenticator;
 use Authwave\InitVector;
 use Authwave\NotLoggedInException;
 use Authwave\ProviderUri\AdminUri;
-use Authwave\ProviderUri\AuthUri;
+use Authwave\ProviderUri\LoginUri;
 use Authwave\ProviderUri\LogoutUri;
 use Authwave\RedirectHandler;
 use Authwave\SessionData;
@@ -74,7 +74,7 @@ class AuthenticatorTest extends TestCase {
 		$sut = new Authenticator(
 			"test-key",
 			"/",
-			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -89,13 +89,13 @@ class AuthenticatorTest extends TestCase {
 		$redirectHandler->expects(self::once())
 			->method("redirect")
 			->with(self::callback(fn(UriInterface $uri) =>
-				$uri->getHost() === AuthUri::DEFAULT_BASE_REMOTE_URI
+				$uri->getHost() === LoginUri::DEFAULT_BASE_REMOTE_URI
 			));
 
 		$sut = new Authenticator(
 			"test-key",
 			"/",
-			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -144,9 +144,9 @@ class AuthenticatorTest extends TestCase {
 			->willReturn($iv);
 
 		$expectedQueryParts = [
-			AuthUri::QUERY_STRING_CIPHER => $cipher,
-			AuthUri::QUERY_STRING_INIT_VECTOR => $ivString,
-			AuthUri::QUERY_STRING_CURRENT_PATH => $currentPath,
+			LoginUri::QUERY_STRING_CIPHER => $cipher,
+			LoginUri::QUERY_STRING_INIT_VECTOR => $ivString,
+			LoginUri::QUERY_STRING_CURRENT_PATH => $currentPath,
 		];
 		$expectedQuery = http_build_query($expectedQueryParts);
 
@@ -160,7 +160,7 @@ class AuthenticatorTest extends TestCase {
 		$sut = new Authenticator(
 			$key,
 			$currentPath,
-			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -180,7 +180,7 @@ class AuthenticatorTest extends TestCase {
 		$sut = new Authenticator(
 			"test-key",
 			"/",
-			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -290,7 +290,7 @@ class AuthenticatorTest extends TestCase {
 		new Authenticator(
 			"test-key",
 			$currentUri,
-			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -317,7 +317,7 @@ class AuthenticatorTest extends TestCase {
 		new Authenticator(
 			"test-key",
 			"/example-path?filter=something",
-			AuthUri::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -328,7 +328,7 @@ class AuthenticatorTest extends TestCase {
 		$auth = new Authenticator(
 			"test-key",
 			"/example-path",
-			AuthUri::DEFAULT_BASE_REMOTE_URI
+			LoginUri::DEFAULT_BASE_REMOTE_URI
 		);
 		$sut = $auth->getAdminUri();
 		self::assertEquals(

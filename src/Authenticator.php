@@ -3,7 +3,7 @@ namespace Authwave;
 
 use Authwave\ProviderUri\AbstractProviderUri;
 use Authwave\ProviderUri\AdminUri;
-use Authwave\ProviderUri\AuthUri;
+use Authwave\ProviderUri\LoginUri;
 use Authwave\ProviderUri\ProfileUri;
 use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
@@ -76,15 +76,18 @@ class Authenticator {
 		$this->sessionData = new SessionData($token);
 		$this->session->set(self::SESSION_KEY, $this->sessionData);
 
-		$this->redirectHandler->redirect($this->getAuthUri($token));
+		$this->redirectHandler->redirect($this->getLoginUri($token));
 	}
 
-	public function logout(string $redirectToPath = "/"):void {
-		$this->session->remove(self::SESSION_KEY);
+	public function logout(Token $token = null):void {
+		if(is_null($token)) {
+			$token = new Token($this->clientKey);
+		}
 
-		$uri = (new Uri())
-			->withPath($redirectToPath);
-		$this->redirectHandler->redirect($uri);
+		$this->sessionData = new SessionData($token);
+		$this->session->set(self::SESSION_KEY, $this->sessionData);
+
+		$this->redirectHandler->redirect($this->getLogoutUri($token));
 	}
 
 	public function getUuid():string {
@@ -102,8 +105,16 @@ class Authenticator {
 		return $userData->getField($name);
 	}
 
-	public function getAuthUri(Token $token):AbstractProviderUri {
-		return new AuthUri(
+	public function getLoginUri(Token $token):AbstractProviderUri {
+		return new LoginUri(
+			$token,
+			$this->currentUriPath,
+			$this->authwaveHost
+		);
+	}
+
+	private function getLogoutUri(Token $token):AbstractProviderUri {
+		return new LogoutUri(
 			$token,
 			$this->currentUriPath,
 			$this->authwaveHost
@@ -114,8 +125,17 @@ class Authenticator {
 		return new AdminUri($this->authwaveHost);
 	}
 
-	public function getProfileUri():UriInterface {
-		return new ProfileUri($this->authwaveHost);
+	public function getProfileUri(Token $token = null):UriInterface {
+		if(is_null($token)) {
+			$token = new Token($this->clientKey);
+		}
+
+		return new ProfileUri(
+			$token,
+			$this->getUuid(),
+			$this->currentUriPath,
+			$this->authwaveHost
+		);
 	}
 
 	private function completeAuth():void {
@@ -131,6 +151,8 @@ class Authenticator {
 			self::SESSION_KEY,
 			new SessionData($token, $userData)
 		);
+
+		setcookie("authwave-trackshift", "test", 0, "/", "localhost");
 
 		$this->redirectHandler->redirect(
 			(new Uri($this->currentUriPath))
