@@ -35,10 +35,10 @@ abstract class AbstractProviderUri extends Uri {
 	protected function buildQuery(
 		Token $token,
 		string $currentPath,
-		string $data = null
+		string $message = null
 	):string {
 		return http_build_query([
-			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher($data),
+			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher($message),
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
 			self::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
 		]);

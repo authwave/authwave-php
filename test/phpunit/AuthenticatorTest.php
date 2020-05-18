@@ -64,16 +64,19 @@ class AuthenticatorTest extends TestCase {
 		self::assertTrue($sut->isLoggedIn());
 	}
 
-	// TODO: Session shouldn't be cleared on call to logout - instead it should
-	// redirect to the provider, and a new test should asset the response data
-	// contains a logout confirmation.
-	public function TODO_UPDATE_testLogoutClearsSession() {
+	public function testLogoutCallsLogoutUri() {
 		$sessionData = self::createMock(SessionData::class);
 		$_SESSION = [
 			Authenticator::SESSION_KEY => $sessionData
 		];
 
 		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getHost() === "login.authwave.com"
+				&& $uri->getPath() === "/logout"
+			));
 
 		$sut = new Authenticator(
 			"test-key",
@@ -83,6 +86,44 @@ class AuthenticatorTest extends TestCase {
 			$redirectHandler
 		);
 		$sut->logout();
+		self::assertNotEmpty($_SESSION);
+	}
+
+	public function testCompleteAuthFromLogoutClearsSession() {
+		$token = self::createMock(Token::class);
+
+		$sessionData = self::createMock(SessionData::class);
+		$sessionData->method("getToken")
+			->willReturn($token);
+
+		$_SESSION = [
+			Authenticator::SESSION_KEY => $sessionData,
+		];
+
+		$responseCipher = "abcdef";
+
+		$currentUri = "/example-page-" . uniqid();
+		$currentUri .= "?";
+		$currentUri .= http_build_query([
+			Authenticator::RESPONSE_QUERY_PARAMETER => $responseCipher,
+		]);
+
+		$redirectHandler = self::createMock(RedirectHandler::class);
+		$redirectHandler->expects(self::once())
+			->method("redirect")
+			->with(self::callback(fn(UriInterface $uri) =>
+				$uri->getHost() == ""
+				&& $uri->getPath() == $currentUri
+			));
+
+		new Authenticator(
+			"test-key",
+			"/",
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
+			null,
+			$redirectHandler
+		);
+
 		self::assertEmpty($_SESSION);
 	}
 

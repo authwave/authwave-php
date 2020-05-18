@@ -10,9 +10,12 @@ class LogoutUri extends AbstractProviderUri {
 		string $baseRemoteUri = self::DEFAULT_BASE_REMOTE_URI
 	) {
 		$baseRemoteUri = $this->normaliseBaseUri($baseRemoteUri);
-		$baseRemoteUri = $baseRemoteUri->withPath("/logout");
 
 		parent::__construct($baseRemoteUri);
-		$this->query = $this->buildQuery($token, $currentPath);
+		$this->query = $this->buildQuery(
+			$token,
+			$currentPath,
+			"action=logout"
+		);
 	}
 }
