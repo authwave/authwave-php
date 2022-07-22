@@ -1,7 +1,7 @@
 <?php
 namespace Authwave\ProviderUri;
 
-class AdminUri extends AbstractProviderUri {
+class AdminUriBase extends BaseProviderUri {
 	public function __construct(
 		string $baseRemoteUri
 	) {

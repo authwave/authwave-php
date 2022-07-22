@@ -3,13 +3,15 @@
 	"description": "PHP client library to implement Authwave in your application",
 
 	"require": {
-		"php": ">=7.4",
+		"php": ">=8.1",
 		"ext-openssl": "*",
+		"phpgt/cipher": "dev-master",
 		"phpgt/http": "1.*",
 		"phpgt/session": ">=1.1"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "8.*"
+		"phpunit/phpunit": "8.*",
+		"ext-sodium": "*"
 	},
 	"autoload": {
 		"psr-4": {

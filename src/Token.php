@@ -3,22 +3,25 @@ namespace Authwave;
 
 use Authwave\ResponseData\AbstractResponseData;
 use Authwave\ResponseData\UserData;
+use Gt\Cipher\CipherText;
+use Gt\Cipher\InitVector;
+use Gt\Cipher\Key;
+use Gt\Cipher\Message\EncryptedMessage;
+use Gt\Cipher\Message\PlainTextMessage;
 use StdClass;
 
 class Token {
-	const ENCRYPTION_METHOD = "aes128";
-
-	private string $key;
+	private Key $key;
 	private InitVector $secretIv;
 	private InitVector $iv;
 
 	public function __construct(
-		string $key,
-		InitVector $secretIv = null,
-		InitVector $iv = null
+		string $keyString,
+		InitVector $sessionIv = null,
+		InitVector $iv = null,
 	) {
-		$this->key = $key;
-		$this->secretIv = $secretIv ?? new InitVector();
+		$this->key = new Key($keyString);
+		$this->secretIv = $sessionIv ?? new InitVector();
 		$this->iv = $iv ?? new InitVector();
 	}
 
@@ -34,35 +37,21 @@ class Token {
  * response cipher, which will be sent back to the client application in the
  * querystring.
  */
-	public function generateRequestCipher(string $message = null):string {
-		$data = $this->secretIv;
-		if($message) {
-			$data .= "|" . $message;
-		}
-
-		$rawCipher = openssl_encrypt(
-			$data,
-			self::ENCRYPTION_METHOD,
-			$this->key,
-			0,
-			$this->iv->getBytes()
-		);
-
-		return base64_encode($rawCipher);
+	public function generateRequestCipher(string $message = ""):CipherText {
+		$plainTextMessage = new PlainTextMessage($message, $this->getIv());
+		return $plainTextMessage->encrypt($this->key);
 	}
 
 // The response cipher is send from the remote provider back to the client
 // application after a successful authentication and includes a serialised
 // UserData object, encrypted using the secret IV, which was created when
 // encrypting the original request cipher.
-	public function decryptResponseCipher(string $cipher):AbstractResponseData {
-		$decrypted = openssl_decrypt(
-			base64_decode($cipher),
-			self::ENCRYPTION_METHOD,
-			$this->key,
-			0,
-			$this->secretIv->getBytes()
+	public function decode(string $base64cipher):AbstractResponseData {
+		$encryptedMessage = new EncryptedMessage(
+			$base64cipher,
+			$this->iv,
 		);
+		$decrypted = $encryptedMessage->decrypt($this->key);
 
 		if(!$decrypted) {
 			throw new ResponseCipherDecryptionException();

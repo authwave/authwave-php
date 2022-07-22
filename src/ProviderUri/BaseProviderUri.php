@@ -5,7 +5,7 @@ use Authwave\InsecureProtocolException;
 use Authwave\Token;
 use Gt\Http\Uri;
 
-abstract class AbstractProviderUri extends Uri {
+abstract class BaseProviderUri extends Uri {
 	const DEFAULT_BASE_REMOTE_URI = "login.authwave.com";
 	const QUERY_STRING_CIPHER = "c";
 	const QUERY_STRING_INIT_VECTOR = "i";
@@ -35,10 +35,10 @@ abstract class AbstractProviderUri extends Uri {
 	protected function buildQuery(
 		Token $token,
 		string $currentPath,
-		string $message = null
+		string $message = ""
 	):string {
 		return http_build_query([
-			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher($message),
+			self::QUERY_STRING_CIPHER => $token->generateRequestCipher($message),
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
 			self::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
 		]);

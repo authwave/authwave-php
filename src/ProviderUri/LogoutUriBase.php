@@ -3,7 +3,7 @@ namespace Authwave\ProviderUri;
 
 use Authwave\Token;
 
-class LogoutUri extends AbstractProviderUri {
+class LogoutUriBase extends BaseProviderUri {
 	public function __construct(
 		Token $token,
 		string $currentPath = "/",
@@ -15,7 +15,7 @@ class LogoutUri extends AbstractProviderUri {
 		$this->query = $this->buildQuery(
 			$token,
 			$currentPath,
-			"action=logout"
+			"action=logout",
 		);
 	}
 }

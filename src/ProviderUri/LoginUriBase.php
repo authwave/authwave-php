@@ -10,7 +10,7 @@ use Gt\Http\Uri;
  * pass the secret IV to the provider, encrypted with the API key. The secret
  * IV is only ever stored in the client's session, and is unique to the session.
  */
-class LoginUri extends AbstractProviderUri {
+class LoginUriBase extends BaseProviderUri {
 	/**
 	 * @param Token $token This must be the same instance of the Token when
 	 * creating Authenticator for the first time as it is when checking the

@@ -3,7 +3,7 @@ namespace Authwave\ProviderUri;
 
 use Authwave\Token;
 
-class ProfileUri extends AbstractProviderUri {
+class ProfileUriBase extends BaseProviderUri {
 	public function __construct(
 		Token $token,
 		string $uuid,
