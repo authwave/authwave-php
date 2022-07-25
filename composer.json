@@ -5,7 +5,7 @@
 	"require": {
 		"php": ">=8.1",
 		"ext-openssl": "*",
-		"phpgt/cipher": "dev-master",
+		"phpgt/cipher": "^1.0",
 		"phpgt/http": "1.*",
 		"phpgt/session": ">=1.1"
 	},
