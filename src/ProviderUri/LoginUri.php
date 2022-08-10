@@ -10,7 +10,7 @@ use Gt\Http\Uri;
  * pass the secret IV to the provider, encrypted with the API key. The secret
  * IV is only ever stored in the client's session, and is unique to the session.
  */
-class LoginUriBase extends BaseProviderUri {
+class LoginUri extends BaseProviderUri {
 	/**
 	 * @param Token $token This must be the same instance of the Token when
 	 * creating Authenticator for the first time as it is when checking the
@@ -22,11 +22,15 @@ class LoginUriBase extends BaseProviderUri {
 	 */
 	public function __construct(
 		Token $token,
-		string $currentPath = "/",
+		string $currentPath,
 		string $baseRemoteUri = self::DEFAULT_BASE_REMOTE_URI
 	) {
 		$baseRemoteUri = $this->normaliseBaseUri($baseRemoteUri);
 		parent::__construct($baseRemoteUri);
-		$this->query = $this->buildQuery($token, $currentPath);
+		$this->query = $this->buildQuery(
+			$token,
+			$currentPath,
+			"action=login"
+		);
 	}
 }

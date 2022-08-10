@@ -2,7 +2,7 @@
 namespace Authwave\Test\ProviderUri;
 
 use Authwave\InitVector;
-use Authwave\ProviderUri\LoginUriBase;
+use Authwave\ProviderUri\LoginUri;
 use Authwave\Token;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
@@ -23,7 +23,7 @@ class LoginUriTest extends TestCase {
 			->willReturn($iv);
 
 		$returnPath = "/examplePage";
-		$sut = new LoginUriBase(
+		$sut = new LoginUri(
 			$token,
 			$returnPath,
 			$baseUri
@@ -32,17 +32,17 @@ class LoginUriTest extends TestCase {
 
 		self::assertEquals(
 			$mockCipherValue,
-			$queryParts[LoginUriBase::QUERY_STRING_CIPHER],
+			$queryParts[LoginUri::QUERY_STRING_CIPHER],
 		);
 
 		self::assertEquals(
 			$mockIvValue,
-			$queryParts[LoginUriBase::QUERY_STRING_INIT_VECTOR]
+			$queryParts[LoginUri::QUERY_STRING_INIT_VECTOR]
 		);
 
 		self::assertEquals(
 			bin2hex($returnPath),
-			$queryParts[LoginUriBase::QUERY_STRING_CURRENT_PATH]
+			$queryParts[LoginUri::QUERY_STRING_CURRENT_PATH]
 		);
 	}
 }

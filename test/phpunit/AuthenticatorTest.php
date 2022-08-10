@@ -4,13 +4,13 @@ namespace Authwave\Test;
 use Authwave\Authenticator;
 use Authwave\NotLoggedInException;
 use Authwave\ProviderUri\BaseProviderUri;
-use Authwave\ProviderUri\LoginUriBase;
+use Authwave\ProviderUri\LoginUri;
 use Authwave\RedirectHandler;
-use Authwave\ResponseData\AbstractResponseData;
+use Authwave\ResponseData\BaseResponseData;
 use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
 use Authwave\Token;
-use Authwave\ResponseData\UserData;
+use Authwave\ResponseData\UserResponseData;
 use Gt\Http\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
@@ -46,7 +46,7 @@ class AuthenticatorTest extends TestCase {
 	}
 
 	public function testIsLoggedInTrueWhenSessionDataSet() {
-		$userData = self::createMock(UserData::class);
+		$userData = self::createMock(UserResponseData::class);
 		$sessionData = self::createMock(SessionData::class);
 		$sessionData->expects(self::once())
 			->method("getData")
@@ -84,9 +84,9 @@ class AuthenticatorTest extends TestCase {
 			->willReturn($iv);
 
 		$expectedQueryParts = [
-			LoginUriBase::QUERY_STRING_CIPHER => $cipher,
-			LoginUriBase::QUERY_STRING_INIT_VECTOR => $ivString,
-			LoginUriBase::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
+			LoginUri::QUERY_STRING_CIPHER => $cipher,
+			LoginUri::QUERY_STRING_INIT_VECTOR => $ivString,
+			LoginUri::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
 		];
 		$expectedQuery = http_build_query($expectedQueryParts);
 
@@ -100,7 +100,7 @@ class AuthenticatorTest extends TestCase {
 		$sut = new Authenticator(
 			$key,
 			$currentPath,
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -110,7 +110,7 @@ class AuthenticatorTest extends TestCase {
 	public function testGetUuid() {
 		$exampleId = uniqid("example-id-");
 
-		$userData = self::createMock(UserData::class);
+		$userData = self::createMock(UserResponseData::class);
 		$userData->method("getId")
 			->willReturn($exampleId);
 		$sessionData = self::createMock(SessionData::class);
@@ -140,7 +140,7 @@ class AuthenticatorTest extends TestCase {
 	public function testGetEmail() {
 		$expectedEmail = "example@example.com";
 
-		$userData = self::createMock(UserData::class);
+		$userData = self::createMock(UserResponseData::class);
 		$userData->method("getEmail")
 			->willReturn($expectedEmail);
 		$sessionData = self::createMock(SessionData::class);
@@ -166,7 +166,7 @@ class AuthenticatorTest extends TestCase {
 		new Authenticator(
 			"test-key",
 			"/example-path/?filter=something",
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -228,7 +228,7 @@ class AuthenticatorTest extends TestCase {
 		new Authenticator(
 			"test-key",
 			$currentUri,
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -241,7 +241,7 @@ class AuthenticatorTest extends TestCase {
 			$newSessionData
 		);
 		self::assertInstanceOf(
-			AbstractResponseData::class,
+			BaseResponseData::class,
 			$newSessionData->getData()
 		);
 	}
@@ -259,7 +259,7 @@ class AuthenticatorTest extends TestCase {
 		$sut = new Authenticator(
 			"test-key",
 			"/",
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -304,7 +304,7 @@ class AuthenticatorTest extends TestCase {
 		$sut = new Authenticator(
 			"test-key",
 			"/",
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -342,7 +342,7 @@ class AuthenticatorTest extends TestCase {
 		new Authenticator(
 			"test-key",
 			"/",
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);
@@ -357,13 +357,13 @@ class AuthenticatorTest extends TestCase {
 		$redirectHandler->expects(self::once())
 			->method("redirect")
 			->with(self::callback(fn(UriInterface $uri) =>
-				$uri->getHost() === LoginUriBase::DEFAULT_BASE_REMOTE_URI
+				$uri->getHost() === LoginUri::DEFAULT_BASE_REMOTE_URI
 			));
 
 		$sut = new Authenticator(
 			"test-key",
 			"/",
-			LoginUriBase::DEFAULT_BASE_REMOTE_URI,
+			LoginUri::DEFAULT_BASE_REMOTE_URI,
 			null,
 			$redirectHandler
 		);

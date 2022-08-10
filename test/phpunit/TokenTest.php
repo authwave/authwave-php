@@ -4,7 +4,7 @@ namespace Authwave\Test;
 use Authwave\InvalidUserDataSerializationException;
 use Authwave\ResponseCipherDecryptionException;
 use Authwave\Token;
-use Authwave\ResponseData\UserData;
+use Authwave\ResponseData\UserResponseData;
 use Gt\Cipher\InitVector;
 use Gt\Cipher\Key;
 use Gt\Cipher\Message\DecryptionFailureException;
@@ -96,7 +96,7 @@ class TokenTest extends TestCase {
 		$cipher = base64_encode($cipher);
 		$sut = new Token($clientKey, $secretIv, $iv);
 		$userData = $sut->decode($cipher);
-		self::assertInstanceOf(UserData::class, $userData);
+		self::assertInstanceOf(UserResponseData::class, $userData);
 		self::assertEquals($uuid, $userData->getId());
 		self::assertEquals($email, $userData->getEmail());
 	}

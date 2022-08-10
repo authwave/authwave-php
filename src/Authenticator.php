@@ -2,54 +2,53 @@
 namespace Authwave;
 
 use Authwave\ProviderUri\BaseProviderUri;
-use Authwave\ProviderUri\AdminUriBase;
-use Authwave\ProviderUri\LoginUriBase;
-use Authwave\ProviderUri\LogoutUriBase;
-use Authwave\ProviderUri\ProfileUriBase;
+use Authwave\ProviderUri\AdminUri;
+use Authwave\ProviderUri\LoginUri;
+use Authwave\ProviderUri\LogoutUri;
+use Authwave\ProviderUri\ProfileUri;
+use Authwave\ResponseData\UserResponseData;
+use Gt\Cipher\Key;
+use Gt\Cipher\Message\EncryptedMessage;
 use Gt\Http\Uri;
 use Gt\Session\SessionContainer;
 use Psr\Http\Message\UriInterface;
 
 class Authenticator {
-	const SESSION_KEY = "AUTHWAVE_SESSION";
 	const RESPONSE_QUERY_PARAMETER = "AUTHWAVE_RESPONSE_DATA";
-	const LOGIN_TYPE_DEFAULT = "login-default";
-	const LOGIN_TYPE_ADMIN = "login-admin";
 
 	private SessionData $sessionData;
+	private User $user;
 
 	public function __construct(
 		private readonly string $clientKey,
-		private readonly string $currentUriPath,
+		private readonly Uri $currentUri,
 		private readonly string $authwaveHost = "login.authwave.com",
 		private ?SessionContainer $session = null,
-		private ?RedirectHandler $redirectHandler = null
+		private ?RedirectHandler $redirectHandler = null,
 	) {
 		$this->session = $this->session ?? new GlobalSessionContainer();
-
-		if(!$this->session->contains(self::SESSION_KEY)) {
-// TODO: If there is no Token or UserData in the SessionData, do we even
-// need to store it to the current session at all?
-			$this->session->set(self::SESSION_KEY, new SessionData());
-		}
-		/** @var SessionData $sessionData*/
-		$sessionData = $this->session->get(self::SESSION_KEY);
-
-		$this->sessionData = $sessionData;
 		$this->redirectHandler = $redirectHandler ?? new RedirectHandler();
+		if($data = $this->session->get(SessionData::class)) {
+			$this->sessionData = $data;
+
+			try {
+				$responseData = $this->sessionData->getData();
+				if($responseData instanceof UserResponseData) {
+					$this->user = new User(
+						$responseData->getId(),
+						$responseData->getEmail(),
+						$responseData->getAllFields(),
+					);
+				}
+			}
+			catch(NotLoggedInException) {}
+		}
 
 		$this->completeAuth();
 	}
 
 	public function isLoggedIn():bool {
-		try {
-			$this->sessionData->getData();
-		}
-		catch(NotLoggedInException $exception) {
-			return false;
-		}
-
-		return true;
+		return isset($this->user);
 	}
 
 	public function login(Token $token = null):void {
@@ -62,8 +61,7 @@ class Authenticator {
 		}
 
 		$this->sessionData = new SessionData($token);
-		$this->session->set(self::SESSION_KEY, $this->sessionData);
-
+		$this->session->set(SessionData::class, $this->sessionData);
 		$this->redirectHandler->redirect($this->getLoginUri($token));
 	}
 
@@ -73,44 +71,36 @@ class Authenticator {
 		}
 
 		$this->sessionData = new SessionData($token);
-		$this->session->set(self::SESSION_KEY, $this->sessionData);
-
+		$this->session->set(SessionData::class, $this->sessionData);
 		$this->redirectHandler->redirect($this->getLogoutUri($token));
 	}
 
-	public function getId():string {
-		$userData = $this->sessionData->getData();
-		return $userData->getId();
-	}
+	public function getUser():User {
+		if(!isset($this->user)) {
+			throw new NotLoggedInException();
+		}
 
-	public function getEmail():string {
-		$userData = $this->sessionData->getData();
-		return $userData->getEmail();
-	}
-
-	public function getField(string $name):?string {
-		$userData = $this->sessionData->getData();
-		return $userData->getField($name);
+		return $this->user;
 	}
 
 	public function getLoginUri(Token $token):BaseProviderUri {
-		return new LoginUriBase(
+		return new LoginUri(
 			$token,
-			$this->currentUriPath,
+			$this->currentUri,
 			$this->authwaveHost
 		);
 	}
 
 	private function getLogoutUri(Token $token):BaseProviderUri {
-		return new LogoutUriBase(
+		return new LogoutUri(
 			$token,
-			$this->currentUriPath,
+			$this->currentUri,
 			$this->authwaveHost
 		);
 	}
 
 	public function getAdminUri():UriInterface {
-		return new AdminUriBase($this->authwaveHost);
+		return new AdminUri($this->authwaveHost);
 	}
 
 	public function getProfileUri(Token $token = null):UriInterface {
@@ -118,38 +108,48 @@ class Authenticator {
 			$token = new Token($this->clientKey);
 		}
 
-		return new ProfileUriBase(
+		return new ProfileUri(
 			$token,
-			$this->getId(),
-			$this->currentUriPath,
+			$this->user->id,
+			$this->currentUri,
 			$this->authwaveHost
 		);
 	}
 
 	private function completeAuth():void {
-		return;
 		$queryData = $this->getQueryData();
 
 		if(!$queryData) {
 			return;
 		}
 
+
 		$token = $this->sessionData->getToken();
-		$userData = $token->decode($queryData);
+		$secretSessionIv = $token->getSecretIv();
+		$encrypted = new EncryptedMessage($queryData, $secretSessionIv);
+		$key = new Key($this->clientKey);
+		$decrypt = $encrypted->decrypt($key);
+		parse_str($decrypt, $data);
+		$userData = new UserResponseData(
+			$data["id"],
+			$data["email"],
+			$data["kvp"] ?? [],
+		);
+
 		$this->session->set(
-			self::SESSION_KEY,
+			SessionData::class,
 			new SessionData($token, $userData)
 		);
 
 		$this->redirectHandler->redirect(
-			(new Uri($this->currentUriPath))
+			(new Uri($this->currentUri))
 			->withoutQueryValue(self::RESPONSE_QUERY_PARAMETER)
 		);
 	}
 
 	private function getQueryData():?string {
 		$queryString = parse_url(
-			$this->currentUriPath,
+			$this->currentUri,
 			PHP_URL_QUERY
 		);
 		if(!$queryString) {

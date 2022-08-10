@@ -3,7 +3,7 @@ namespace Authwave\ProviderUri;
 
 use Authwave\Token;
 
-class LogoutUriBase extends BaseProviderUri {
+class LogoutUri extends BaseProviderUri {
 	public function __construct(
 		Token $token,
 		string $currentPath = "/",

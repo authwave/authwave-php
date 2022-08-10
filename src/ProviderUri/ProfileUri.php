@@ -1,12 +1,18 @@
 <?php
 namespace Authwave\ProviderUri;
 
-class AdminUriBase extends BaseProviderUri {
+use Authwave\Token;
+
+class ProfileUri extends BaseProviderUri {
 	public function __construct(
+		Token $token,
+		string $uuid,
+		string $currentPath,
 		string $baseRemoteUri
 	) {
 		$baseRemoteUri = $this->normaliseBaseUri($baseRemoteUri);
 		parent::__construct($baseRemoteUri);
-		$this->path = "/admin";
+		$this->path = "/profile/";
+		$this->query = $this->buildQuery($token, $uuid);
 	}
 }
