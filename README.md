@@ -58,3 +58,12 @@ else {
 	HTML;
 }
 ```
+
+Running unit tests
+------------------
+
+From the root directory, unit tests can be ran with the following command:
+
+```bash
+vendor/bin/phpunit test/phpunit --coverage-clover test/phpunit/_coverage --whitelist src
+```
