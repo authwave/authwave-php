@@ -11,6 +11,7 @@ use Authwave\SessionData;
 use Authwave\SessionNotStartedException;
 use Authwave\Token;
 use Authwave\ResponseData\UserResponseData;
+use Gt\Cipher\CipherText;
 use Gt\Cipher\InitVector;
 use Gt\Http\Uri;
 use PHPUnit\Framework\TestCase;
@@ -59,7 +60,9 @@ class AuthenticatorTest extends TestCase {
 		$key = uniqid("key-");
 		$currentPath = uniqid("/path/");
 
-		$cipher = "example-cipher";
+		$cipherString = "example-cipher";
+		$cipher = self::createMock(CipherText::class);
+		$cipher->method("__toString")->willReturn($cipherString);
 		$ivString = "example-iv";
 
 		$iv = self::createMock(InitVector::class);
@@ -73,7 +76,7 @@ class AuthenticatorTest extends TestCase {
 			->willReturn($iv);
 
 		$expectedQueryParts = [
-			LoginUri::QUERY_STRING_CIPHER => $cipher,
+			LoginUri::QUERY_STRING_CIPHER => (string)$cipher,
 			LoginUri::QUERY_STRING_INIT_VECTOR => $ivString,
 			LoginUri::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
 		];
@@ -256,6 +259,8 @@ class AuthenticatorTest extends TestCase {
 
 	public function testLoginDoesNothingWhenAlreadyLoggedIn() {
 		$sessionData = self::createMock(SessionData::class);
+		$sessionData->method("getData")
+			->willReturn(self::createMock(UserResponseData::class));
 		$_SESSION = [
 			SessionData::class => $sessionData,
 		];
@@ -273,10 +278,17 @@ class AuthenticatorTest extends TestCase {
 		);
 
 		$token = self::createMock(Token::class);
+		$requestCipherString = "example-request-cipher";
+		$requestCipher = self::createMock(CipherText::class);
+		$requestCipher->method("__toString")->willReturn($requestCipherString);
+		$ivBytes = "0123456789";
+		$iv = self::createMock(InitVector::class);
+		$iv->method("__toString")->willReturn($ivBytes);
+
 		$token->method("generateRequestCipher")
-			->willReturn("example-request-cipher");
+			->willReturn($requestCipher);
 		$token->method("getIv")
-			->willReturn("0123456789");
+			->willReturn($iv);
 		$sut->login($token);
 	}
 
@@ -306,12 +318,12 @@ class AuthenticatorTest extends TestCase {
 
 				parse_str($uri->getQuery(), $queryParts);
 				/** @var SessionData $session */
-				$session = $_SESSION[Authenticator::SESSION_KEY];
+				$session = $_SESSION[SessionData::class];
 				$token = $session->getToken();
 				$decrypted = $token->decode(
 					$queryParts[BaseProviderUri::QUERY_STRING_CIPHER]
 				);
-				var_dump($decrypted);die();
+				return (bool)$decrypted;
 			}));
 
 		$sut = new Authenticator(
@@ -322,10 +334,16 @@ class AuthenticatorTest extends TestCase {
 			$redirectHandler
 		);
 		$token = self::createMock(Token::class);
+		$cipherString = "example-request-cipher";
+		$cipher = self::createMock(CipherText::class);
+		$cipher->method("__toString")->willReturn($cipherString);
 		$token->method("generateRequestCipher")
-			->willReturn("example-request-cipher");
+			->willReturn($cipher);
+		$ivBytes = "01234567890";
+		$iv = self::createMock(InitVector::class);
+		$iv->method("__toString")->willReturn($ivBytes);
 		$token->method("getIv")
-			->willReturn("01234567890");
+			->willReturn($iv);
 		$sut->logout($token);
 		self::assertNotEmpty($_SESSION);
 	}
@@ -349,10 +367,16 @@ class AuthenticatorTest extends TestCase {
 		);
 
 		$token = self::createMock(Token::class);
+		$cipherString = "example-request-cipher";
+		$cipher = self::createMock(CipherText::class);
+		$cipher->method("__toString")->willReturn($cipherString);
 		$token->method("generateRequestCipher")
-			->willReturn("example-request-cipher");
+			->willReturn($cipher);
+		$ivBytes = "01234567890";
+		$iv = self::createMock(InitVector::class);
+		$iv->method("__toString")->willReturn($ivBytes);
 		$token->method("getIv")
-			->willReturn("01234567890");
+			->willReturn($iv);
 		$sut->login($token);
 	}
 
@@ -376,10 +400,16 @@ class AuthenticatorTest extends TestCase {
 			$redirectHandler
 		);
 		$token = self::createMock(Token::class);
+		$cipherString = "example-request-cipher";
+		$cipher = self::createMock(CipherText::class);
+		$cipher->method("__toString")->willReturn($cipherString);
 		$token->method("generateRequestCipher")
-			->willReturn("example-request-cipher");
+			->willReturn($cipher);
+		$ivBytes = "01234567890";
+		$iv = self::createMock(InitVector::class);
+		$iv->method("__toString")->willReturn($ivBytes);
 		$token->method("getIv")
-			->willReturn("01234567890");
+			->willReturn($iv);
 		$sut->login($token);
 	}
 }
