@@ -67,35 +67,26 @@ class TokenTest extends TestCase {
 	}
 
 	public function testDecryptResponseCipher() {
-		$clientKey = uniqid("test-key-");
-// SecretIv is stored in the client application's session only.
+		$clientKeyBytes = str_repeat("0", SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+		$ivBytes = str_repeat("1", SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+		$uuid = "abcdef";
+		$email = "person@example.com";
+		$cipher = sodium_crypto_secretbox(
+			serialize((object)[
+				"id" => $uuid,
+				"email" => $email,
+			]),
+			$ivBytes,
+			$clientKeyBytes,
+		);
+
 		$secretIv = self::createMock(InitVector::class);
-		$secretIv->method("getBytes")
-			->willReturn(str_repeat("0", 16));
 		$iv = self::createMock(InitVector::class);
 		$iv->method("getBytes")
-			->willReturn(str_repeat("f", 16));
+			->willReturn($ivBytes);
 
-		$uuid = "aabb-ccdd-eeff";
-		$email = "user@example.com";
-		$serialized = serialize((object)[
-			"uuid" => $uuid,
-			"email" => $email,
-			"fields" => (object)[
-				"example1" => "value1",
-			]
-		]);
-
-		$cipher = openssl_encrypt(
-			$serialized,
-			Token::ENCRYPTION_METHOD,
-			$clientKey,
-			0,
-			$secretIv->getBytes()
-		);
-		$cipher = base64_encode($cipher);
-		$sut = new Token($clientKey, $secretIv, $iv);
-		$userData = $sut->decode($cipher);
+		$sut = new Token($clientKeyBytes, $secretIv, $iv);
+		$userData = $sut->decode(base64_encode($cipher));
 		self::assertInstanceOf(UserResponseData::class, $userData);
 		self::assertEquals($uuid, $userData->getId());
 		self::assertEquals($email, $userData->getEmail());

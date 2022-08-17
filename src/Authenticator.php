@@ -18,10 +18,11 @@ class Authenticator {
 
 	private SessionData $sessionData;
 	private User $user;
+	private Uri $currentUri;
 
 	public function __construct(
 		private readonly string $clientKey,
-		private readonly Uri $currentUri,
+		string|Uri $currentUri,
 		private readonly string $authwaveHost = "login.authwave.com",
 		private ?SessionContainer $session = null,
 		private ?RedirectHandler $redirectHandler = null,
@@ -43,6 +44,11 @@ class Authenticator {
 			}
 			catch(NotLoggedInException) {}
 		}
+
+		if(is_string($currentUri)) {
+			$currentUri = new Uri($currentUri);
+		}
+		$this->currentUri = $currentUri;
 
 		$this->completeAuth();
 	}
@@ -123,6 +129,9 @@ class Authenticator {
 			return;
 		}
 
+		if(!isset($this->sessionData)) {
+			return;
+		}
 
 		$token = $this->sessionData->getToken();
 		$secretSessionIv = $token->getSecretIv();

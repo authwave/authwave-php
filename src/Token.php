@@ -24,7 +24,6 @@ class Token {
 		$this->key = new Key($keyString);
 		$this->secretSessionIv = $sessionIv ?? new InitVector();
 		$this->iv = $iv ?? new InitVector();
-		Log::debug("Created login information:\n\tsecretSessionIV\t$this->secretSessionIv\n\t\tiv\t$this->iv");
 	}
 
 	public function getIv():InitVector {
@@ -72,9 +71,9 @@ class Token {
 		}
 
 		return new UserResponseData(
-			$data->{"uuid"},
+			$data->{"uuid"} ?? $data->{"id"},
 			$data->{"email"},
-			$data->{"fields"} ?? new StdClass()
+			$data->{"fields"} ?? []
 		);
 	}
 }
