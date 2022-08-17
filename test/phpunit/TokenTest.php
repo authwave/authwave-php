@@ -72,7 +72,7 @@ class TokenTest extends TestCase {
 		$uuid = "abcdef";
 		$email = "person@example.com";
 		$cipher = sodium_crypto_secretbox(
-			serialize((object)[
+			json_encode((object)[
 				"id" => $uuid,
 				"email" => $email,
 			]),

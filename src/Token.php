@@ -63,10 +63,8 @@ class Token {
 			throw new ResponseCipherDecryptionException();
 		}
 
-		$data = @unserialize(
-			$decrypted
-		);
-		if($data === false) {
+		$data = json_decode($decrypted);
+		if($data === null) {
 			throw new InvalidUserDataSerializationException();
 		}
 
