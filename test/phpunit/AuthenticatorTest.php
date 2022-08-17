@@ -200,7 +200,7 @@ class AuthenticatorTest extends TestCase {
 	public function testCompleteAuth() {
 		$keyBytes = str_repeat("0", SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
 		$ivBytes = str_repeat("1", SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-		$plainTextMessage = http_build_query([
+		$plainTextMessage = json_encode([
 			"id" => 123,
 			"email" => "person@example.com",
 		]);

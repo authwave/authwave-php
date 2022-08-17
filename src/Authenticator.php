@@ -137,12 +137,12 @@ class Authenticator {
 		$secretSessionIv = $token->getSecretIv();
 		$encrypted = new EncryptedMessage($queryData, $secretSessionIv);
 		$key = new Key($this->clientKey);
-		$decrypt = $encrypted->decrypt($key);
-		parse_str($decrypt, $data);
+		$decrypted = $encrypted->decrypt($key);
+		$data = json_decode($decrypted);
 		$userData = new UserResponseData(
-			$data["id"],
-			$data["email"],
-			$data["kvp"] ?? [],
+			$data->{"id"},
+			$data->{"email"},
+			$data->{"kvp"} ?? [],
 		);
 
 		$this->session->set(
