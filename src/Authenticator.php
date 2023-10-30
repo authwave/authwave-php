@@ -10,27 +10,33 @@ use Authwave\ResponseData\UserResponseData;
 use Gt\Cipher\Key;
 use Gt\Cipher\Message\EncryptedMessage;
 use Gt\Http\Uri;
+use Gt\Logger\Log;
 use Gt\Session\SessionContainer;
 use Psr\Http\Message\UriInterface;
 
 class Authenticator {
+	const SESSION_STORE_KEY = "AUTHWAVE_CONSUMER_SESSION";
 	const RESPONSE_QUERY_PARAMETER = "AUTHWAVE_RESPONSE_DATA";
 
 	private SessionData $sessionData;
 	private User $user;
 	private Uri $currentUri;
+	private readonly string $deploymentId;
+	private readonly string $secret;
 
 	public function __construct(
-		private readonly string $clientKey,
+		string $clientKey,
 		string|Uri $currentUri,
 		private readonly string $authwaveHost = "login.authwave.com",
 		private ?SessionContainer $session = null,
 		private ?RedirectHandler $redirectHandler = null,
 	) {
+		[$this->deploymentId, $this->secret] = explode("_", $clientKey);
+
 		$this->session = $this->session ?? new GlobalSessionContainer();
 		$this->redirectHandler = $redirectHandler ?? new RedirectHandler();
-		if($data = $this->session->get(SessionData::class)) {
-			$this->sessionData = $data;
+		if($sessionData = $this->session->get(SessionData::class)) {
+			$this->sessionData = $sessionData;
 
 			try {
 				$responseData = $this->sessionData->getData();
@@ -63,7 +69,8 @@ class Authenticator {
 		}
 
 		if(is_null($token)) {
-			$token = new Token($this->clientKey);
+			Log::debug("Created new CONSUMER token");
+			$token = new Token($this->secret);
 		}
 
 		$this->sessionData = new SessionData($token);
@@ -72,8 +79,9 @@ class Authenticator {
 	}
 
 	public function logout(Token $token = null):void {
+// TODO: Log out needs implementing - ApplicationDeploymentNotFoundException throws!
 		if(is_null($token)) {
-			$token = new Token($this->clientKey);
+			$token = new Token($this->secret);
 		}
 
 		$this->sessionData = new SessionData($token);
@@ -93,7 +101,8 @@ class Authenticator {
 		return new LoginUri(
 			$token,
 			$this->currentUri,
-			$this->authwaveHost
+			$this->deploymentId,
+			$this->authwaveHost,
 		);
 	}
 
@@ -101,7 +110,8 @@ class Authenticator {
 		return new LogoutUri(
 			$token,
 			$this->currentUri,
-			$this->authwaveHost
+			$this->deploymentId,
+			$this->authwaveHost,
 		);
 	}
 
@@ -111,7 +121,7 @@ class Authenticator {
 
 	public function getProfileUri(Token $token = null):UriInterface {
 		if(is_null($token)) {
-			$token = new Token($this->clientKey);
+			$token = new Token($this->secret);
 		}
 
 		return new ProfileUri(
@@ -130,13 +140,15 @@ class Authenticator {
 		}
 
 		if(!isset($this->sessionData)) {
+			die("No session data");
+			$this->tidyResponseData();
 			return;
 		}
 
 		$token = $this->sessionData->getToken();
 		$secretSessionIv = $token->getSecretIv();
 		$encrypted = new EncryptedMessage($queryData, $secretSessionIv);
-		$key = new Key($this->clientKey);
+		$key = new Key($this->secret);
 		$decrypted = $encrypted->decrypt($key);
 		$data = json_decode($decrypted);
 		$userData = new UserResponseData(
@@ -150,9 +162,13 @@ class Authenticator {
 			new SessionData($token, $userData)
 		);
 
+		$this->tidyResponseData();
+	}
+
+	private function tidyResponseData():void {
 		$this->redirectHandler->redirect(
 			(new Uri($this->currentUri))
-			->withoutQueryValue(self::RESPONSE_QUERY_PARAMETER)
+				->withoutQueryValue(self::RESPONSE_QUERY_PARAMETER)
 		);
 	}
 

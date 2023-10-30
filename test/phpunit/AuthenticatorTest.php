@@ -78,7 +78,7 @@ class AuthenticatorTest extends TestCase {
 		$expectedQueryParts = [
 			LoginUri::QUERY_STRING_CIPHER => (string)$cipher,
 			LoginUri::QUERY_STRING_INIT_VECTOR => $ivString,
-			LoginUri::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
+			LoginUri::QUERY_STRING_CURRENT_URI => bin2hex($currentPath),
 		];
 		$expectedQuery = http_build_query($expectedQueryParts);
 

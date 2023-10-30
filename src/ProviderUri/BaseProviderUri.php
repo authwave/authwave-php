@@ -7,9 +7,10 @@ use Gt\Http\Uri;
 
 abstract class BaseProviderUri extends Uri {
 	const DEFAULT_BASE_REMOTE_URI = "login.authwave.com";
-	const QUERY_STRING_CIPHER = "cipher";
-	const QUERY_STRING_INIT_VECTOR = "iv";
-	const QUERY_STRING_CURRENT_PATH = "path";
+	const QUERY_STRING_CIPHER = "c";
+	const QUERY_STRING_INIT_VECTOR = "i";
+	const QUERY_STRING_CURRENT_URI = "u";
+	const QUERY_STRING_DEPLOYMENT_ID = "d";
 
 	protected function normaliseBaseUri(string $baseUri):Uri {
 		$scheme = parse_url($baseUri, PHP_URL_SCHEME)
@@ -35,13 +36,15 @@ abstract class BaseProviderUri extends Uri {
 
 	protected function buildQuery(
 		Token $token,
+		string $deploymentId,
 		string $currentPath,
 		string $message = "",
 	):string {
 		return http_build_query([
 			self::QUERY_STRING_CIPHER => (string)$token->generateRequestCipher($message),
+			self::QUERY_STRING_DEPLOYMENT_ID => $deploymentId,
 			self::QUERY_STRING_INIT_VECTOR => (string)$token->getIv(),
-			self::QUERY_STRING_CURRENT_PATH => bin2hex($currentPath),
+			self::QUERY_STRING_CURRENT_URI => bin2hex($currentPath),
 		]);
 	}
 }

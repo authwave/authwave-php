@@ -8,8 +8,6 @@ use Gt\Cipher\InitVector;
 use Gt\Cipher\Key;
 use Gt\Cipher\Message\EncryptedMessage;
 use Gt\Cipher\Message\PlainTextMessage;
-use Gt\Logger\Log;
-use StdClass;
 
 class Token {
 	private Key $key;
@@ -17,11 +15,11 @@ class Token {
 	private InitVector $iv;
 
 	public function __construct(
-		string $keyString,
+		string $secret,
 		InitVector $sessionIv = null,
 		InitVector $iv = null,
 	) {
-		$this->key = new Key($keyString);
+		$this->key = new Key($secret);
 		$this->secretSessionIv = $sessionIv ?? new InitVector();
 		$this->iv = $iv ?? new InitVector();
 	}
