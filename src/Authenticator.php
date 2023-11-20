@@ -7,8 +7,10 @@ use Authwave\ProviderUri\LoginUri;
 use Authwave\ProviderUri\LogoutUri;
 use Authwave\ProviderUri\ProfileUri;
 use Authwave\ResponseData\UserResponseData;
+use Gt\Cipher\InitVector;
 use Gt\Cipher\Key;
 use Gt\Cipher\Message\EncryptedMessage;
+use Gt\Cipher\Message\PlainTextMessage;
 use Gt\Http\Uri;
 use Gt\Logger\Log;
 use Gt\Session\SessionContainer;
@@ -17,6 +19,7 @@ use Psr\Http\Message\UriInterface;
 class Authenticator {
 	const SESSION_STORE_KEY = "AUTHWAVE_CONSUMER_SESSION";
 	const RESPONSE_QUERY_PARAMETER = "AUTHWAVE_RESPONSE_DATA";
+	const FAKE_EMAIL = "fakelogin@authwave.com";
 
 	private SessionData $sessionData;
 	private User $user;
@@ -84,9 +87,47 @@ class Authenticator {
 			$token = new Token($this->secret);
 		}
 
-		$this->sessionData = new SessionData($token);
-		$this->session->set(SessionData::class, $this->sessionData);
-		$this->redirectHandler->redirect($this->getLogoutUri($token));
+		if($this->user->email === self::FAKE_EMAIL) {
+			$this->session->remove(SessionData::class);
+			unset($this->user);
+		}
+		else {
+			$this->redirectHandler->redirect($this->getLogoutUri($token));
+			$this->sessionData = new SessionData($token);
+			$this->session->set(SessionData::class, $this->sessionData);
+		}
+	}
+
+	public function fakeLogin(string $userId, string $redirectTo = "/"):void {
+		$secretIv = new InitVector();
+		$token = new Token($this->secret, $secretIv);
+		$sessionData = new SessionData($token);
+		$this->session->set(SessionData::class, $sessionData);
+
+		$userData = new UserResponseData(
+			$userId,
+			self::FAKE_EMAIL,
+		);
+
+		$this->session->set(
+			SessionData::class,
+			new SessionData($token, $userData)
+		);
+
+		$message = new PlainTextMessage(
+			json_encode([
+				"id" => $userData->getId(),
+				"email" => $userData->getEmail(),
+			]),
+			$secretIv,
+		);
+
+		$cipherText = $message->encrypt(new Key($this->secret));
+		$queryString = http_build_query([
+			"AUTHWAVE_RESPONSE_DATA" => (string)$cipherText,
+		]);
+		$uri = new Uri("$redirectTo?$queryString");
+		$this->redirectHandler->redirect($uri);
 	}
 
 	public function getUser():User {
@@ -140,7 +181,6 @@ class Authenticator {
 		}
 
 		if(!isset($this->sessionData)) {
-			die("No session data");
 			$this->tidyResponseData();
 			return;
 		}
