@@ -87,7 +87,7 @@ class Authenticator {
 			$token = new Token($this->secret);
 		}
 
-		if($this->user->email === self::FAKE_EMAIL) {
+		if(isset($this->user) && $this->user->email === self::FAKE_EMAIL) {
 			$this->session->remove(SessionData::class);
 			unset($this->user);
 		}
