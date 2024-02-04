@@ -92,9 +92,10 @@ class Authenticator {
 			unset($this->user);
 		}
 		else {
-			$this->redirectHandler->redirect($this->getLogoutUri($token));
 			$this->sessionData = new SessionData($token);
 			$this->session->set(SessionData::class, $this->sessionData);
+			$this->session->remove(SessionData::class);
+			$this->redirectHandler->redirect($this->getLogoutUri($token));
 		}
 	}
 
