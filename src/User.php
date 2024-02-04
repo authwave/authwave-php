@@ -11,4 +11,8 @@ class User {
 	public function getData(string $key):?string {
 		return $this->kvp[$key] ?? null;
 	}
+
+	public function getKvp():array {
+		return $this->kvp;
+	}
 }
