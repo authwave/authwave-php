@@ -127,6 +127,10 @@ class Authenticator {
 		$queryString = http_build_query([
 			"AUTHWAVE_RESPONSE_DATA" => (string)$cipherText,
 		]);
+		if($currentQuery = $this->currentUri->getQuery()) {
+			$queryString .= "&";
+			$queryString .= $currentQuery;
+		}
 		$uri = new Uri("$redirectTo?$queryString");
 		$this->redirectHandler->redirect($uri);
 	}
