@@ -99,7 +99,7 @@ class Authenticator {
 		}
 	}
 
-	public function fakeLogin(string $userId, string $redirectTo = "/"):void {
+	public function fakeLogin(string $userId, ?string $email = null, string $redirectTo = "/"):void {
 		$secretIv = new InitVector();
 		$token = new Token($this->secret, $secretIv);
 		$sessionData = new SessionData($token);
@@ -107,7 +107,7 @@ class Authenticator {
 
 		$userData = new UserResponseData(
 			$userId,
-			self::FAKE_EMAIL,
+			$email ?? self::FAKE_EMAIL,
 		);
 
 		$this->session->set(
